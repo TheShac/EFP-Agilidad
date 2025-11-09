@@ -1,0 +1,365 @@
+<div class="container section">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="headline">
+      <h1>Gestión de Centros Educativos</h1>
+      <p class="muted">Registrar, editar y buscar centros educativos asociados</p>
+    </div>
+    <div class="spacer"></div>
+
+    <button mat-flat-button color="primary" (click)="toggleForm()" class="btn-add">
+      <mat-icon>{{ showForm ? 'close' : 'add_business' }}</mat-icon>
+      {{ showForm ? 'Cerrar' : 'Agregar centro' }}
+    </button>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filters-section">
+    <div class="filters-header">
+      <mat-icon>search</mat-icon>
+      <h2>Filtros de Búsqueda</h2>
+    </div>
+
+    <div class="filters">
+      <mat-form-field appearance="outline" class="flex1">
+        <mat-label>Buscar</mat-label>
+        <input matInput [(ngModel)]="searchTerm" />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="role-filter">
+        <mat-label>Tipo (filtro)</mat-label>
+        <mat-select [(ngModel)]="selectedTipo">
+          <mat-option value="all">Todos</mat-option>
+          <mat-option value="PARTICULAR">Particular</mat-option>
+          <mat-option value="PARTICULAR_SUBVENCIONADO">Particular subvencionado</mat-option>
+          <mat-option value="SLEP">SLEP</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <!-- FORMULARIO (crear/editar) -->
+  <div class="form-container" [class.form-open]="showForm">
+    <mat-card class="elev form-card" *ngIf="showForm">
+      <mat-card-header class="form-header">
+        <div class="form-title-section">
+          <div class="form-icon"><mat-icon>add_business</mat-icon></div>
+          <div class="form-titles">
+            <h2>{{ isEditing ? 'Editar centro educativo' : 'Agregar centro educativo' }}</h2>
+            <p>Completa los datos obligatorios marcados con *</p>
+          </div>
+        </div>
+        <button mat-icon-button (click)="toggleForm()" class="close-form-btn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-card-header>
+
+      <mat-card-content class="form-content">
+        <form class="form-grid">
+          <!-- Básicos -->
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Nombre del centro *</mat-label>
+              <input matInput [(ngModel)]="newCentroEducativo.nombre" name="nombre" required />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Tipo *</mat-label>
+              <mat-select [(ngModel)]="newCentroEducativo.tipo" name="tipo" required>
+                <mat-option value="PARTICULAR">Particular</mat-option>
+                <mat-option value="PARTICULAR_SUBVENCIONADO">Particular subvencionado</mat-option>
+                <mat-option value="SLEP">Slep</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Región / Comuna -->
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Región *</mat-label>
+              <mat-select [(ngModel)]="newCentroEducativo.region" name="region" (selectionChange)="onRegionChange()" required>
+                <mat-option *ngFor="let r of REGIONES" [value]="r.nombre">{{ r.nombre }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Comuna *</mat-label>
+              <mat-select [(ngModel)]="newCentroEducativo.comuna" name="comuna" required>
+                <mat-option *ngFor="let c of comunasFiltradas" [value]="c">{{ c }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Dirección del colegio -->
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Dirección (referencia)</mat-label>
+              <input matInput [(ngModel)]="newCentroEducativo.direccion" name="direccion" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Nombre de calle</mat-label>
+              <input matInput [(ngModel)]="newCentroEducativo.calle" name="calle" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Número</mat-label>
+              <input matInput [(ngModel)]="newCentroEducativo.numero" name="numero" />
+            </mat-form-field>
+          </div>
+
+          <!-- Contacto del colegio -->
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Teléfono</mat-label>
+              <input matInput [(ngModel)]="newCentroEducativo.telefono" name="telefono" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Correo del colegio</mat-label>
+              <input matInput type="email" [(ngModel)]="newCentroEducativo.correo" name="correo" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>URL / Redes sociales</mat-label>
+              <input matInput [(ngModel)]="newCentroEducativo.url_rrss" name="url_rrss" />
+            </mat-form-field>
+          </div>
+
+          <!-- Convenio -->
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field full-width">
+              <mat-label>Convenio</mat-label>
+              <mat-select [(ngModel)]="newCentroEducativo.convenio" name="convenio">
+                <mat-option value="Marco SLEP">Marco SLEP</mat-option>
+                <mat-option value="Solicitud directa">Solicitud directa</mat-option>
+                <mat-option value="ADEP">ADEP</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </form>
+      </mat-card-content>
+
+      <!-- Footer fijo con acciones -->
+      <div class="form-footer">
+        <button mat-stroked-button color="warn" (click)="toggleForm()">Cancelar</button>
+        <button mat-flat-button color="primary" (click)="addOrUpdateCentro()">
+          <mat-icon>save</mat-icon>
+          {{ isEditing ? 'Guardar cambios' : 'Guardar' }}
+        </button>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- LISTADO -->
+  <mat-card class="elev">
+    <mat-card-content class="list-container">
+      <div class="list-item" *ngFor="let c of filteredCentros()">
+        <div class="item-content">
+          <!-- Col 1: Nombre + dirección -->
+          <div class="col col-name">
+            <div class="title truncate">{{ c.nombre }}</div>
+            <div class="sub muted truncate">
+              {{ c.region }} · {{ c.comuna }}
+              <ng-container *ngIf="c.calle || c.numero"> · {{ c.calle }} {{ c.numero }}</ng-container>
+            </div>
+          </div>
+
+          <!-- Col 2: Tipo/Convenio -->
+          <div class="col col-type">
+            <div class="type-badge truncate">{{ c.tipo }}</div>
+            <div class="conv muted truncate" *ngIf="c.convenio">{{ c.convenio }}</div>
+          </div>
+
+          <!-- Col 3: Contacto -->
+          <div class="col col-contact">
+            <div class="contact" *ngIf="c.telefono">
+              <mat-icon>call</mat-icon><span class="truncate">{{ c.telefono }}</span>
+            </div>
+            <div class="contact" *ngIf="c.correo">
+              <mat-icon>email</mat-icon><span class="truncate">{{ c.correo }}</span>
+            </div>
+            <div class="contact" *ngIf="c.url_rrss">
+              <mat-icon>link</mat-icon><span class="truncate">{{ c.url_rrss }}</span>
+            </div>
+          </div>
+
+          <!-- Col 4: Acciones -->
+          <div class="col col-actions">
+            <button mat-icon-button (click)="viewCentro(c)" title="Ver detalles">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button mat-icon-button color="primary" (click)="editCentro(c)" title="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="accent" (click)="openContacts(c)" title="Añadir contactos">
+              <mat-icon>person_add</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="askDelete(c)" title="Eliminar">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- EMPTY -->
+  <mat-card *ngIf="!filteredCentros().length" class="elev empty">
+    <mat-card-content class="muted empty__content">
+      <mat-icon>school</mat-icon>
+      <p>No hay centros que coincidan con el criterio.</p>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- DIALOG DETALLES -->
+  <!-- (sin cambios funcionales; lo dejo igual que tu versión) -->
+  <div class="details-dialog" *ngIf="selectedCentroEducativo">
+    <div class="dialog-overlay" (click)="closeDetails()"></div>
+
+    <div class="dialog-content">
+      <div class="dialog-header">
+        <h2>Información del Centro</h2>
+        <button mat-icon-button (click)="closeDetails()" class="close-btn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="dialog-body" *ngIf="selectedCentroEducativo">
+        <div class="details-grid">
+          <div class="detail-item"><label>Nombre:</label><span>{{ selectedCentroEducativo.nombre }}</span></div>
+          <div class="detail-item"><label>Tipo:</label><span>{{ selectedCentroEducativo.tipo }}</span></div>
+          <div class="detail-item"><label>Región:</label><span>{{ selectedCentroEducativo.region }}</span></div>
+          <div class="detail-item"><label>Comuna:</label><span>{{ selectedCentroEducativo.comuna }}</span></div>
+          <div class="detail-item" *ngIf="selectedCentroEducativo.direccion">
+            <label>Dirección (ref):</label><span>{{ selectedCentroEducativo.direccion }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedCentroEducativo.calle || selectedCentroEducativo.numero">
+            <label>Calle / Nº:</label><span>{{ selectedCentroEducativo.calle }} {{ selectedCentroEducativo.numero }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedCentroEducativo.telefono">
+            <label>Teléfono:</label><span>{{ selectedCentroEducativo.telefono }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedCentroEducativo.correo">
+            <label>Correo:</label><span>{{ selectedCentroEducativo.correo }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedCentroEducativo.url_rrss">
+            <label>URL / RRSS:</label><span>{{ selectedCentroEducativo.url_rrss }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedCentroEducativo.convenio">
+            <label>Convenio:</label><span>{{ selectedCentroEducativo.convenio }}</span>
+          </div>
+
+          <div class="detail-item" *ngIf="selectedCentroEducativo?.trabajadores?.length">
+            <label>Trabajadores:</label>
+            <div *ngFor="let t of selectedCentroEducativo.trabajadores">
+              • {{ t.rol || '—' }} — {{ t.nombre }}
+              <span *ngIf="t.rut">({{ t.rut }})</span>
+              <span *ngIf="t.correo">— {{ t.correo }}</span>
+              <span *ngIf="t.telefono">— {{ t.telefono }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dialog-actions">
+        <button mat-stroked-button (click)="closeDetails()">Cerrar</button>
+        <button mat-raised-button color="primary" (click)="editCentro(selectedCentroEducativo!)">
+          <mat-icon>edit</mat-icon> Editar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIALOG CONFIRMAR ELIMINACIÓN -->
+  <!-- (sin cambios) -->
+  <div class="confirm-dialog" *ngIf="pendingDelete">
+    <div class="dialog-overlay" (click)="cancelDelete()" tabindex="0"></div>
+    <div class="dialog-content confirm-card" (keydown.escape)="cancelDelete()">
+      <div class="confirm-header">
+        <div class="warn-icon">
+          <mat-icon>warning_amber</mat-icon>
+        </div>
+        <h2>Confirmar eliminación</h2>
+      </div>
+      <div class="confirm-body">
+        <p>¿Estás seguro de que quieres eliminar a <b>{{ pendingDelete!.nombre }}</b>?</p>
+        <p class="muted">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="confirm-actions">
+        <button mat-stroked-button (click)="cancelDelete()">Cancelar</button>
+        <button mat-flat-button color="warn" (click)="confirmDelete()" class="btn-danger">
+          <mat-icon>delete</mat-icon> Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIALOG AÑADIR/EDITAR CONTACTOS -->
+  <!-- (sin cambios funcionales) -->
+  <div class="details-dialog" *ngIf="contactsForCentro">
+    <div class="dialog-overlay" (click)="closeContacts()"></div>
+
+    <div class="dialog-content">
+      <div class="dialog-header">
+        <h2>Añadir/Editar contactos</h2>
+        <button mat-icon-button (click)="closeContacts()" class="close-btn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="dialog-body">
+        <div class="details-grid" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="detail-item" style="grid-column: 1 / -1;">
+            <label style="font-size:16px">Director</label>
+          </div>
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre</mat-label>
+            <input matInput [(ngModel)]="contactosForm.directorNombre" name="directorNombre" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>RUT</mat-label>
+            <input matInput [(ngModel)]="contactosForm.directorRut" name="directorRut" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Correo</mat-label>
+            <input matInput type="email" [(ngModel)]="contactosForm.directorCorreo" name="directorCorreo" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Teléfono</mat-label>
+            <input matInput [(ngModel)]="contactosForm.directorTelefono" name="directorTelefono" />
+          </mat-form-field>
+
+          <div class="detail-item" style="grid-column: 1 / -1; margin-top: 8px;">
+            <label style="font-size:16px">UTP</label>
+          </div>
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre</mat-label>
+            <input matInput [(ngModel)]="contactosForm.utpNombre" name="utpNombre" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>RUT</mat-label>
+            <input matInput [(ngModel)]="contactosForm.utpRut" name="utpRut" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Correo</mat-label>
+            <input matInput type="email" [(ngModel)]="contactosForm.utpCorreo" name="utpCorreo" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Teléfono</mat-label>
+            <input matInput [(ngModel)]="contactosForm.utpTelefono" name="utpTelefono" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="dialog-actions">
+        <button mat-stroked-button (click)="closeContacts()">Cancelar</button>
+        <button mat-raised-button color="primary" (click)="saveContactsForCentro()">
+          <mat-icon>save</mat-icon>
+          Guardar contactos
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

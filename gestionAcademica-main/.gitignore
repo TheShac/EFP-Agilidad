@@ -1,0 +1,16 @@
+# Ignorar dependencias (¡NUNCA SUBIR!)
+/front/node_modules
+/back/node_modules
+/node_modules
+
+# Ignorar carpetas de build/compilación
+/front/dist
+/front/.angular
+/back/dist
+
+# Ignorar archivos de caché y sistema
+.DS_Store
+/npm-debug.log
+
+# Ignorar archivos de entorno (contienen contraseñas)
+/back/.env
