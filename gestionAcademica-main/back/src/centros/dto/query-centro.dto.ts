@@ -1,13 +1,15 @@
-import { IsIn, IsInt, IsOptional, IsString, Min } from 'class-validator';
-import { TIPO_CENTRO_VALUES } from './create-centro.dto';
+import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { TipoEmpresa, EstadoEmpresa } from '@prisma/client';
 
 export class QueryCentroDto {
   @IsOptional() @IsString()
-  search?: string;
+  search?: string;  // Busca en razonSocial, nombreFantasia, comuna, region, email
 
-  @IsOptional()
-  @IsIn(TIPO_CENTRO_VALUES)
-  tipo?: (typeof TIPO_CENTRO_VALUES)[number];
+  @IsOptional() @IsEnum(TipoEmpresa)
+  tipo?: TipoEmpresa;
+
+  @IsOptional() @IsEnum(EstadoEmpresa)
+  estado?: EstadoEmpresa;
 
   @IsOptional() @IsInt() @Min(1)
   page?: number = 1;
@@ -16,7 +18,7 @@ export class QueryCentroDto {
   limit?: number = 10;
 
   @IsOptional() @IsString()
-  orderBy?: 'nombre' | 'region' | 'comuna' = 'nombre';
+  orderBy?: 'razonSocial' | 'region' | 'comuna' | 'tipo' = 'razonSocial';
 
   @IsOptional() @IsString()
   orderDir?: 'asc' | 'desc' = 'asc';

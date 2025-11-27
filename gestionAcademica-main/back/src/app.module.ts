@@ -4,24 +4,25 @@ import { AppService } from './app.service';
 
 import { PrismaModule } from '../prisma/prisma.module';
 
-import { AuthorizationRequestsModule } from './authorization-requests/authorization-requests.module';
+// TODO: Módulos deshabilitados temporalmente - requieren migración
+// import { AuthorizationRequestsModule } from './authorization-requests/authorization-requests.module';
 import { ColaboradoresModule } from './colaboradores/colaboradores.module';
 import { CentrosModule } from './centros/centros.module';
-import { TrabajadorModule } from './trabajador/trabajador.module';
+// import { TrabajadorModule } from './trabajador/trabajador.module'; // Tabla eliminada
 import { PracticasModule } from './practicas/practicas.module';
 import { EstudianteModule } from './estudiante/estudiante.module';
-import { CartaModule } from './carta/carta.module';
+// import { CartaModule } from './carta/carta.module'; // Requiere actualización
 
 @Module({
   imports: [
     PrismaModule,                // Global
-    AuthorizationRequestsModule,
-    ColaboradoresModule,
-    CentrosModule,
-    TrabajadorModule,
-    PracticasModule,
-    EstudianteModule,
-    CartaModule,                 // Nuevo
+    // AuthorizationRequestsModule, // ❌ Deshabilitado - tabla no existe
+    ColaboradoresModule,         // ⚠️ Requiere actualización
+    CentrosModule,               // ⚠️ Requiere actualización
+    // TrabajadorModule,         // ❌ Deshabilitado - tabla eliminada
+    PracticasModule,             // ⚠️ Requiere actualización
+    EstudianteModule,            // ✅ Parcialmente corregido
+    // CartaModule,              // ❌ Deshabilitado - requiere actualización
   ],
   controllers: [AppController],
   providers: [AppService],

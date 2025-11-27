@@ -1,18 +1,25 @@
-import { IsEmail, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
-
-export const TIPO_CENTRO_VALUES = ['PARTICULAR', 'PARTICULAR_SUBVENCIONADO', 'SLEP'] as const;
-export type TipoCentroDTO = typeof TIPO_CENTRO_VALUES[number];
+import { IsEmail, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { TipoEmpresa, TamanoEmpresa, EstadoEmpresa } from '@prisma/client';
 
 export class CreateCentroDto {
   @IsString()
+  @MaxLength(100)
+  @IsNotEmpty()
+  rut!: string;
+
+  @IsString()
   @MaxLength(200)
   @IsNotEmpty()
-  nombre!: string;
+  razonSocial!: string;
 
-  // Validamos contra los 3 valores válidos del enum de Prisma
-  @IsString()
-  @IsIn(TIPO_CENTRO_VALUES)
-  tipo!: TipoCentroDTO;
+  @IsOptional() @IsString() @MaxLength(200)
+  nombreFantasia?: string | null;
+
+  @IsEnum(TipoEmpresa)
+  tipo!: TipoEmpresa;
+
+  @IsOptional() @IsEnum(TamanoEmpresa)
+  tamano?: TamanoEmpresa | null;
 
   @IsString()
   @IsNotEmpty()
@@ -22,25 +29,21 @@ export class CreateCentroDto {
   @IsNotEmpty()
   comuna!: string;
 
-  @IsOptional() @IsString()
-  convenio?: string | null;
-
-  @IsOptional() @IsString()
+  @IsOptional() @IsString() @MaxLength(255)
   direccion?: string | null;
 
-  // nombre_calle / numero_calle en BD
-  @IsOptional() @IsString()
-  nombre_calle?: string | null;
+  @IsOptional() @IsString() @MaxLength(50)
+  telefono?: string | null;
 
-  @IsOptional()
-  numero_calle?: number | null;
-
-  @IsOptional()
-  telefono?: number | null;
-
-  @IsOptional()
-  correo?: string | null;
+  @IsOptional() @IsEmail()
+  email?: string | null;
 
   @IsOptional() @IsString()
-  url_rrss?: string | null;
+  sitioWeb?: string | null;
+
+  @IsOptional() @IsEnum(EstadoEmpresa)
+  estado?: EstadoEmpresa = EstadoEmpresa.ACTIVA;
+
+  @IsOptional() @IsString()
+  observaciones?: string | null;
 }

@@ -2,14 +2,14 @@
   <!-- HEADER -->
   <div class="header">
     <div class="headline">
-      <h1>Gestión de Centros Educativos</h1>
-      <p class="muted">Registrar, editar y buscar centros educativos asociados</p>
+      <h1>Gestión de Empresas</h1>
+      <p class="muted">Registrar, editar y buscar empresas colaboradoras del programa de prácticas</p>
     </div>
     <div class="spacer"></div>
 
     <button mat-flat-button color="primary" (click)="toggleForm()" class="btn-add">
       <mat-icon>{{ showForm ? 'close' : 'add_business' }}</mat-icon>
-      {{ showForm ? 'Cerrar' : 'Agregar centro' }}
+      {{ showForm ? 'Cerrar' : 'Agregar empresa' }}
     </button>
   </div>
 
@@ -28,12 +28,13 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="role-filter">
-        <mat-label>Tipo (filtro)</mat-label>
+        <mat-label>Tipo de empresa (filtro)</mat-label>
         <mat-select [(ngModel)]="selectedTipo">
-          <mat-option value="all">Todos</mat-option>
-          <mat-option value="PARTICULAR">Particular</mat-option>
-          <mat-option value="PARTICULAR_SUBVENCIONADO">Particular subvencionado</mat-option>
-          <mat-option value="SLEP">SLEP</mat-option>
+          <mat-option value="all">Todas</mat-option>
+          <mat-option value="PRIVADA">Privada</mat-option>
+          <mat-option value="PUBLICA">Pública</mat-option>
+          <mat-option value="MIXTA">Mixta</mat-option>
+          <mat-option value="ONG">ONG</mat-option>
         </mat-select>
       </mat-form-field>
     </div>
@@ -44,9 +45,9 @@
     <mat-card class="elev form-card" *ngIf="showForm">
       <mat-card-header class="form-header">
         <div class="form-title-section">
-          <div class="form-icon"><mat-icon>add_business</mat-icon></div>
+          <div class="form-icon"><mat-icon>business</mat-icon></div>
           <div class="form-titles">
-            <h2>{{ isEditing ? 'Editar centro educativo' : 'Agregar centro educativo' }}</h2>
+            <h2>{{ isEditing ? 'Editar empresa' : 'Registrar nueva empresa' }}</h2>
             <p>Completa los datos obligatorios marcados con *</p>
           </div>
         </div>
@@ -60,16 +61,49 @@
           <!-- Básicos -->
           <div class="form-row">
             <mat-form-field appearance="outline" class="form-field">
-              <mat-label>Nombre del centro *</mat-label>
-              <input matInput [(ngModel)]="newCentroEducativo.nombre" name="nombre" required />
+              <mat-label>RUT de la empresa *</mat-label>
+              <input matInput [(ngModel)]="newCentroEducativo.rut" name="rut" required placeholder="12345678-9" />
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Razón Social *</mat-label>
+              <input matInput [(ngModel)]="newCentroEducativo.razonSocial" name="razonSocial" required />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Nombre Fantasía</mat-label>
+              <input matInput [(ngModel)]="newCentroEducativo.nombreFantasia" name="nombreFantasia" />
+            </mat-form-field>
+          </div>
+
+          <!-- Tipo y tamaño -->
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
               <mat-label>Tipo *</mat-label>
               <mat-select [(ngModel)]="newCentroEducativo.tipo" name="tipo" required>
-                <mat-option value="PARTICULAR">Particular</mat-option>
-                <mat-option value="PARTICULAR_SUBVENCIONADO">Particular subvencionado</mat-option>
-                <mat-option value="SLEP">Slep</mat-option>
+                <mat-option value="PRIVADA">Privada</mat-option>
+                <mat-option value="PUBLICA">Pública</mat-option>
+                <mat-option value="MIXTA">Mixta</mat-option>
+                <mat-option value="ONG">ONG</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Tamaño</mat-label>
+              <mat-select [(ngModel)]="newCentroEducativo.tamano" name="tamano">
+                <mat-option value="MICRO">Micro</mat-option>
+                <mat-option value="PEQUENA">Pequeña</mat-option>
+                <mat-option value="MEDIANA">Mediana</mat-option>
+                <mat-option value="GRANDE">Grande</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Estado</mat-label>
+              <mat-select [(ngModel)]="newCentroEducativo.estado" name="estado">
+                <mat-option value="ACTIVA">Activa</mat-option>
+                <mat-option value="INACTIVA">Inactiva</mat-option>
+                <mat-option value="SUSPENDIDA">Suspendida</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
@@ -91,51 +125,37 @@
             </mat-form-field>
           </div>
 
-          <!-- Dirección del colegio -->
+          <!-- Dirección completa -->
           <div class="form-row">
-            <mat-form-field appearance="outline" class="form-field">
-              <mat-label>Dirección (referencia)</mat-label>
-              <input matInput [(ngModel)]="newCentroEducativo.direccion" name="direccion" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="form-field">
-              <mat-label>Nombre de calle</mat-label>
-              <input matInput [(ngModel)]="newCentroEducativo.calle" name="calle" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="form-field">
-              <mat-label>Número</mat-label>
-              <input matInput [(ngModel)]="newCentroEducativo.numero" name="numero" />
+            <mat-form-field appearance="outline" class="form-field full-width">
+              <mat-label>Dirección completa</mat-label>
+              <input matInput [(ngModel)]="newCentroEducativo.direccion" name="direccion" placeholder="Calle, número, piso, etc." />
             </mat-form-field>
           </div>
 
-          <!-- Contacto del colegio -->
+          <!-- Contacto de la empresa -->
           <div class="form-row">
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Teléfono</mat-label>
-              <input matInput [(ngModel)]="newCentroEducativo.telefono" name="telefono" />
+              <input matInput [(ngModel)]="newCentroEducativo.telefono" name="telefono" placeholder="+56912345678" />
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field">
-              <mat-label>Correo del colegio</mat-label>
-              <input matInput type="email" [(ngModel)]="newCentroEducativo.correo" name="correo" />
+              <mat-label>Email de la empresa</mat-label>
+              <input matInput type="email" [(ngModel)]="newCentroEducativo.email" name="email" placeholder="contacto@empresa.cl" />
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field">
-              <mat-label>URL / Redes sociales</mat-label>
-              <input matInput [(ngModel)]="newCentroEducativo.url_rrss" name="url_rrss" />
+              <mat-label>Sitio Web</mat-label>
+              <input matInput [(ngModel)]="newCentroEducativo.sitioWeb" name="sitioWeb" placeholder="https://www.empresa.cl" />
             </mat-form-field>
           </div>
 
-          <!-- Convenio -->
+          <!-- Observaciones -->
           <div class="form-row">
             <mat-form-field appearance="outline" class="form-field full-width">
-              <mat-label>Convenio</mat-label>
-              <mat-select [(ngModel)]="newCentroEducativo.convenio" name="convenio">
-                <mat-option value="Marco SLEP">Marco SLEP</mat-option>
-                <mat-option value="Solicitud directa">Solicitud directa</mat-option>
-                <mat-option value="ADEP">ADEP</mat-option>
-              </mat-select>
+              <mat-label>Observaciones</mat-label>
+              <textarea matInput [(ngModel)]="newCentroEducativo.observaciones" name="observaciones" rows="3"></textarea>
             </mat-form-field>
           </div>
         </form>
@@ -159,17 +179,19 @@
         <div class="item-content">
           <!-- Col 1: Nombre + dirección -->
           <div class="col col-name">
-            <div class="title truncate">{{ c.nombre }}</div>
+            <div class="title truncate">{{ c.razonSocial }}</div>
+            <div class="sub muted truncate" *ngIf="c.nombreFantasia">({{ c.nombreFantasia }})</div>
             <div class="sub muted truncate">
               {{ c.region }} · {{ c.comuna }}
-              <ng-container *ngIf="c.calle || c.numero"> · {{ c.calle }} {{ c.numero }}</ng-container>
+              <ng-container *ngIf="c.direccion"> · {{ c.direccion }}</ng-container>
             </div>
           </div>
 
-          <!-- Col 2: Tipo/Convenio -->
+          <!-- Col 2: Tipo/Tamaño -->
           <div class="col col-type">
             <div class="type-badge truncate">{{ c.tipo }}</div>
-            <div class="conv muted truncate" *ngIf="c.convenio">{{ c.convenio }}</div>
+            <div class="conv muted truncate" *ngIf="c.tamano">Tamaño: {{ c.tamano }}</div>
+            <div class="conv muted truncate" *ngIf="c.estado">Estado: {{ c.estado }}</div>
           </div>
 
           <!-- Col 3: Contacto -->
@@ -177,11 +199,11 @@
             <div class="contact" *ngIf="c.telefono">
               <mat-icon>call</mat-icon><span class="truncate">{{ c.telefono }}</span>
             </div>
-            <div class="contact" *ngIf="c.correo">
-              <mat-icon>email</mat-icon><span class="truncate">{{ c.correo }}</span>
+            <div class="contact" *ngIf="c.email">
+              <mat-icon>email</mat-icon><span class="truncate">{{ c.email }}</span>
             </div>
-            <div class="contact" *ngIf="c.url_rrss">
-              <mat-icon>link</mat-icon><span class="truncate">{{ c.url_rrss }}</span>
+            <div class="contact" *ngIf="c.sitioWeb">
+              <mat-icon>link</mat-icon><span class="truncate">{{ c.sitioWeb }}</span>
             </div>
           </div>
 
@@ -228,35 +250,42 @@
 
       <div class="dialog-body" *ngIf="selectedCentroEducativo">
         <div class="details-grid">
-          <div class="detail-item"><label>Nombre:</label><span>{{ selectedCentroEducativo.nombre }}</span></div>
+          <div class="detail-item"><label>RUT:</label><span>{{ selectedCentroEducativo.rut }}</span></div>
+          <div class="detail-item"><label>Razón Social:</label><span>{{ selectedCentroEducativo.razonSocial }}</span></div>
+          <div class="detail-item" *ngIf="selectedCentroEducativo.nombreFantasia">
+            <label>Nombre Fantasía:</label><span>{{ selectedCentroEducativo.nombreFantasia }}</span>
+          </div>
           <div class="detail-item"><label>Tipo:</label><span>{{ selectedCentroEducativo.tipo }}</span></div>
+          <div class="detail-item" *ngIf="selectedCentroEducativo.tamano">
+            <label>Tamaño:</label><span>{{ selectedCentroEducativo.tamano }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedCentroEducativo.estado">
+            <label>Estado:</label><span>{{ selectedCentroEducativo.estado }}</span>
+          </div>
           <div class="detail-item"><label>Región:</label><span>{{ selectedCentroEducativo.region }}</span></div>
           <div class="detail-item"><label>Comuna:</label><span>{{ selectedCentroEducativo.comuna }}</span></div>
           <div class="detail-item" *ngIf="selectedCentroEducativo.direccion">
-            <label>Dirección (ref):</label><span>{{ selectedCentroEducativo.direccion }}</span>
-          </div>
-          <div class="detail-item" *ngIf="selectedCentroEducativo.calle || selectedCentroEducativo.numero">
-            <label>Calle / Nº:</label><span>{{ selectedCentroEducativo.calle }} {{ selectedCentroEducativo.numero }}</span>
+            <label>Dirección:</label><span>{{ selectedCentroEducativo.direccion }}</span>
           </div>
           <div class="detail-item" *ngIf="selectedCentroEducativo.telefono">
             <label>Teléfono:</label><span>{{ selectedCentroEducativo.telefono }}</span>
           </div>
-          <div class="detail-item" *ngIf="selectedCentroEducativo.correo">
-            <label>Correo:</label><span>{{ selectedCentroEducativo.correo }}</span>
+          <div class="detail-item" *ngIf="selectedCentroEducativo.email">
+            <label>Email:</label><span>{{ selectedCentroEducativo.email }}</span>
           </div>
-          <div class="detail-item" *ngIf="selectedCentroEducativo.url_rrss">
-            <label>URL / RRSS:</label><span>{{ selectedCentroEducativo.url_rrss }}</span>
+          <div class="detail-item" *ngIf="selectedCentroEducativo.sitioWeb">
+            <label>Sitio Web:</label><span>{{ selectedCentroEducativo.sitioWeb }}</span>
           </div>
-          <div class="detail-item" *ngIf="selectedCentroEducativo.convenio">
-            <label>Convenio:</label><span>{{ selectedCentroEducativo.convenio }}</span>
+          <div class="detail-item" *ngIf="selectedCentroEducativo.observaciones">
+            <label>Observaciones:</label><span>{{ selectedCentroEducativo.observaciones }}</span>
           </div>
 
-          <div class="detail-item" *ngIf="selectedCentroEducativo?.trabajadores?.length">
-            <label>Trabajadores:</label>
-            <div *ngFor="let t of selectedCentroEducativo.trabajadores">
+          <div class="detail-item" *ngIf="selectedCentroEducativo?.supervisores?.length">
+            <label>Supervisores:</label>
+            <div *ngFor="let t of selectedCentroEducativo.supervisores">
               • {{ t.rol || '—' }} — {{ t.nombre }}
               <span *ngIf="t.rut">({{ t.rut }})</span>
-              <span *ngIf="t.correo">— {{ t.correo }}</span>
+              <span *ngIf="t.email">— {{ t.email }}</span>
               <span *ngIf="t.telefono">— {{ t.telefono }}</span>
             </div>
           </div>
@@ -284,7 +313,7 @@
         <h2>Confirmar eliminación</h2>
       </div>
       <div class="confirm-body">
-        <p>¿Estás seguro de que quieres eliminar a <b>{{ pendingDelete!.nombre }}</b>?</p>
+        <p>¿Estás seguro de que quieres eliminar a <b>{{ pendingDelete!.razonSocial }}</b>?</p>
         <p class="muted">Esta acción no se puede deshacer.</p>
       </div>
       <div class="confirm-actions">

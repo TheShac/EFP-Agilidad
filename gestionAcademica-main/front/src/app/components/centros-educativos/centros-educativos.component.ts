@@ -12,30 +12,29 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 // APIs
-import { CentrosApiService, CentroEducativoDTO, TrabajadorDTO } from '../../services/centros-api.service';
+import { CentrosApiService, EmpresaDTO, SupervisorDTO, TipoEmpresa, TamanoEmpresa, EstadoEmpresa } from '../../services/centros-api.service';
 import { TrabajadoresApiService } from '../../services/trabajadores-api.service';
 
-// === tipos compatibles con tu enum Prisma ===
-type TipoCentro = 'PARTICULAR' | 'PARTICULAR_SUBVENCIONADO' | 'SLEP';
-type Convenio   = 'Marco SLEP' | 'Solicitud directa' | 'ADEP' | string;
-
+// Interfaz actualizada para el nuevo modelo multi-empresa
 interface CentroEducativo {
   id: number;
-  nombre: string;
-  tipo: TipoCentro;
+  rut: string;
+  razonSocial: string;
+  nombreFantasia?: string | null;
+  tipo: TipoEmpresa;
+  tamano?: TamanoEmpresa | null;
   region: string;
   comuna: string;
-  convenio?: Convenio;
-  direccion?: string;
-  url_rrss?: string;
-  calle?: string | null;
-  numero?: number | string | null;
-  telefono?: number | string | null;
-  correo?: string | null;
+  direccion?: string | null;
+  telefono?: string | null;
+  email?: string | null;
+  sitioWeb?: string | null;
+  estado?: EstadoEmpresa;
+  observaciones?: string | null;
 }
 
 type CentroDetalle = CentroEducativo & {
-  trabajadores?: TrabajadorDTO[];
+  supervisores?: SupervisorDTO[];
 };
 
 @Component({
@@ -65,7 +64,7 @@ export class CentrosEducativosComponent {
 
   // ===== filtros (lista) =====
   searchTerm = '';
-  selectedTipo: 'all' | TipoCentro = 'all';
+  selectedTipo: 'all' | TipoEmpresa = 'all';
 
   // ===== regiones y comunas ===== 
   readonly REGIONES: { nombre: string; comunas: string[] }[] = [
@@ -91,17 +90,19 @@ export class CentrosEducativosComponent {
   // ===== formulario =====
   editId: number | null = null;
   newCentroEducativo: Partial<CentroEducativo> = {
-    nombre: '',
-    tipo: 'SLEP',
+    rut: '',
+    razonSocial: '',
+    nombreFantasia: '',
+    tipo: 'PRIVADA',
+    tamano: 'MEDIANA',
     region: '',
     comuna: '',
-    convenio: 'Marco SLEP',
     direccion: '',
-    url_rrss: '',
-    calle: '',
-    numero: '',
     telefono: '',
-    correo: '',
+    email: '',
+    sitioWeb: '',
+    estado: 'ACTIVA',
+    observaciones: '',
   };
 
   // ===== contactos (modal nuevo) =====
@@ -135,19 +136,21 @@ export class CentrosEducativosComponent {
     });
   }
 
-  private mapDTOtoUI = (dto: CentroEducativoDTO): CentroEducativo => ({
+  private mapDTOtoUI = (dto: EmpresaDTO): CentroEducativo => ({
     id: dto.id,
-    nombre: dto.nombre,
-    tipo: (dto.tipo as TipoCentro) ?? 'SLEP',
+    rut: dto.rut,
+    razonSocial: dto.razonSocial,
+    nombreFantasia: dto.nombreFantasia ?? undefined,
+    tipo: dto.tipo,
+    tamano: dto.tamano ?? undefined,
     region: dto.region,
     comuna: dto.comuna,
-    convenio: dto.convenio ?? undefined,
     direccion: dto.direccion ?? undefined,
-    url_rrss: dto.url_rrss ?? undefined,
-    calle: dto.nombre_calle ?? undefined,
-    numero: (dto.numero_calle as any) ?? undefined,
-    telefono: (dto.telefono as any) ?? undefined,
-    correo: dto.correo ?? undefined,
+    telefono: dto.telefono ?? undefined,
+    email: dto.email ?? undefined,
+    sitioWeb: dto.sitioWeb ?? undefined,
+    estado: dto.estado ?? 'ACTIVA',
+    observaciones: dto.observaciones ?? undefined,
   });
 
   // ===== helpers UI =====
@@ -166,17 +169,19 @@ export class CentrosEducativosComponent {
     this.isEditing = false;
     this.editId = null;
     this.newCentroEducativo = {
-      nombre: '',
-      tipo: 'SLEP',
+      rut: '',
+      razonSocial: '',
+      nombreFantasia: '',
+      tipo: 'PRIVADA',
+      tamano: 'MEDIANA',
       region: '',
       comuna: '',
-      convenio: 'Marco SLEP',
       direccion: '',
-      url_rrss: '',
-      calle: '',
-      numero: '',
       telefono: '',
-      correo: '',
+      email: '',
+      sitioWeb: '',
+      estado: 'ACTIVA',
+      observaciones: '',
     };
     this.comunasFiltradas = [];
     this.contactosForm = {
@@ -191,50 +196,43 @@ export class CentrosEducativosComponent {
   // ===== CRUD centro =====
   addOrUpdateCentro() {
     const c = this.newCentroEducativo;
-    if (!c.nombre?.trim() || !c.tipo || !c.region || !c.comuna || !c.convenio) {
-      this.snack.open('Debe completar todos los campos requeridos.', 'Cerrar', { duration: 2500 });
+    if (!c.rut?.trim() || !c.razonSocial?.trim() || !c.tipo || !c.region || !c.comuna) {
+      this.snack.open('Debe completar RUT, Razón Social, Tipo, Región y Comuna.', 'Cerrar', { duration: 2500 });
       return;
     }
 
-    const payloadCentro = {
-      nombre: c.nombre!.trim(),
-      tipo: c.tipo as TipoCentro,
+    const payload: Partial<EmpresaDTO> = {
+      rut: c.rut!.trim(),
+      razonSocial: c.razonSocial!.trim(),
+      nombreFantasia: c.nombreFantasia?.trim() || undefined,
+      tipo: c.tipo,
+      tamano: c.tamano || undefined,
       region: c.region!,
       comuna: c.comuna!,
-      convenio: c.convenio as string,
-      direccion: c.direccion?.trim(),
-      url_rrss: c.url_rrss?.trim(),
-      calle: c.calle?.toString().trim() ?? '',
-      numero: c.numero ?? '',
-      telefono: c.telefono ?? '',
-      correo: c.correo?.toString().trim() ?? '',
+      direccion: c.direccion?.trim() || undefined,
+      telefono: c.telefono?.trim() || undefined,
+      email: c.email?.trim() || undefined,
+      sitioWeb: c.sitioWeb?.trim() || undefined,
+      estado: c.estado || 'ACTIVA',
+      observaciones: c.observaciones?.trim() || undefined,
     };
 
     const req$ = (this.isEditing && this.editId != null)
-      ? this.centrosApi.update(this.editId, payloadCentro)
-      : this.centrosApi.create(payloadCentro);
+      ? this.centrosApi.update(this.editId, payload)
+      : this.centrosApi.create(payload as any);
 
     req$.subscribe({
       next: () => {
-        if (this.isEditing && this.editId != null) {
-          this.snack.open('✓ Centro actualizado correctamente', 'Cerrar', {
-            duration: 4000,
-            horizontalPosition: 'center',
-            verticalPosition: 'bottom',
-            panelClass: ['success-snackbar']
-          });
-          this.toggleForm(); this.resetForm(); this.load();
-        } else {
-          this.snack.open('✓ Centro agregado correctamente', 'Cerrar', {
-            duration: 4000,
-            horizontalPosition: 'center',
-            verticalPosition: 'bottom',
-            panelClass: ['success-snackbar']
-          });
-          this.toggleForm(); this.resetForm(); this.load();
-        }
+        const msg = this.isEditing ? '✓ Empresa actualizada correctamente' : '✓ Empresa agregada correctamente';
+        this.snack.open(msg, 'Cerrar', {
+          duration: 4000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+          panelClass: ['success-snackbar']
+        });
+        this.toggleForm(); this.resetForm(); this.load();
       },
-      error: () => this.snack.open('No se pudo guardar el centro.', 'Cerrar', { duration: 2500 })
+      error: (err) => this.snack.open(`Error: ${err.error?.message || 'No se pudo guardar'}`, 'Cerrar', { duration: 3000 })
     });
   }
 
@@ -280,7 +278,7 @@ export class CentrosEducativosComponent {
     this.centrosApi.getById(c.id).subscribe({
       next: (full) => {
         const base = this.mapDTOtoUI(full);
-        this.selectedCentroEducativo = { ...base, trabajadores: full.trabajadores ?? [] };
+        this.selectedCentroEducativo = { ...base, supervisores: full.supervisores ?? [] };
         this.detalleCargando = false;
       },
       error: () => {
@@ -395,14 +393,15 @@ export class CentrosEducativosComponent {
     let list = this.centrosEducativos.filter(c => {
       const matchSearch =
         !t ||
-        c.nombre.toLowerCase().includes(t) ||
+        c.razonSocial.toLowerCase().includes(t) ||
+        (c.nombreFantasia || '').toLowerCase().includes(t) ||
         c.region.toLowerCase().includes(t) ||
         c.comuna.toLowerCase().includes(t) ||
         (c.tipo || '').toString().toLowerCase().includes(t);
       const matchTipo = this.selectedTipo === 'all' || c.tipo === this.selectedTipo;
       return matchSearch && matchTipo;
     });
-    list = [...list].sort((a, b) => this.sortAZ ? a.nombre.localeCompare(b.nombre) : b.nombre.localeCompare(a.nombre));
+    list = [...list].sort((a, b) => this.sortAZ ? a.razonSocial.localeCompare(b.razonSocial) : b.razonSocial.localeCompare(a.razonSocial));
     return list;
   }
 }

@@ -9,7 +9,23 @@ export class CentrosService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateCentroDto) {
-    return this.prisma.centroEducativo.create({ data: dto });
+    // Mapear DTO a los campos requeridos de Empresa
+    const data = {
+      rut: dto.rut,
+      razonSocial: dto.razonSocial,
+      nombreFantasia: dto.nombreFantasia,
+      tipo: dto.tipo,
+      tamano: dto.tamano,
+      region: dto.region,
+      comuna: dto.comuna,
+      direccion: dto.direccion,
+      telefono: dto.telefono,
+      email: dto.email,
+      sitioWeb: dto.sitioWeb,
+      estado: dto.estado ?? 'ACTIVA',
+      observaciones: dto.observaciones,
+    };
+    return this.prisma.empresa.create({ data });
   }
 
   async findAll(q: QueryCentroDto) {
@@ -29,11 +45,11 @@ export class CentrosService {
 
     // orderBy y orderDir con whitelists
     const allowedOrderBy = new Set<keyof any>([
-      'id', 'nombre', 'region', 'comuna', 'tipo', 'convenio', 'correo'
+      'id', 'razonSocial', 'nombreFantasia', 'region', 'comuna', 'tipo', 'correo', 'estado'
     ]);
     const orderBy = (q.orderBy && allowedOrderBy.has(q.orderBy as any))
       ? (q.orderBy as string)
-      : 'nombre';
+      : 'razonSocial';
 
     const orderDir = q.orderDir === 'desc' ? 'desc' : 'asc';
 
@@ -43,10 +59,11 @@ export class CentrosService {
       ...(q.search
         ? {
             OR: [
-              { nombre: { contains: q.search, mode: 'insensitive' } },
+              { razonSocial: { contains: q.search, mode: 'insensitive' } },
+              { nombreFantasia: { contains: q.search, mode: 'insensitive' } },
               { comuna: { contains: q.search, mode: 'insensitive' } },
               { region: { contains: q.search, mode: 'insensitive' } },
-              { correo: { contains: q.search, mode: 'insensitive' } },
+              { email: { contains: q.search, mode: 'insensitive' } },
             ],
           }
         : {}),
@@ -54,33 +71,34 @@ export class CentrosService {
 
     // -------- Consulta + conteo en transacción --------
     const [items, total] = await this.prisma.$transaction([
-      this.prisma.centroEducativo.findMany({
+      this.prisma.empresa.findMany({
         where,
         orderBy: { [orderBy]: orderDir },
         skip: (page - 1) * safeLimit,
         take: safeLimit,
         select: {
           id: true,
-          nombre: true,
+          rut: true,
+          razonSocial: true,
+          nombreFantasia: true,
           region: true,
           comuna: true,
           direccion: true,
-          nombre_calle: true,
-          numero_calle: true,
           telefono: true,
-          correo: true,
+          email: true,
           tipo: true,
-          convenio: true,
-          url_rrss: true,
+          tamano: true,
+          estado: true,
+          sitioWeb: true,
           _count: {
             select: {
               practicas: true,
-              trabajadores: true,
+              supervisores: true,
             },
           },
         },
       }),
-      this.prisma.centroEducativo.count({ where }),
+      this.prisma.empresa.count({ where }),
     ]);
 
     return {
@@ -93,44 +111,60 @@ export class CentrosService {
   }
 
   async findOne(id: number) {
-    const centro = await this.prisma.centroEducativo.findUnique({
+    const centro = await this.prisma.empresa.findUnique({
       where: { id },
       include: {
         practicas: {
           select: {
             id: true,
             estado: true,
-            fecha_inicio: true,
-            fecha_termino: true,
+            fechaInicio: true,
+            fechaTermino: true,
             estudiante: { select: { rut: true, nombre: true } },
-            colaborador: { select: { id: true, nombre: true, tipo: true } },
+            supervisor: { select: { id: true, nombre: true, rol: true, cargo: true } },
           },
-          orderBy: { fecha_inicio: 'desc' },
+          orderBy: { fechaInicio: 'desc' },
         },
-        trabajadores: {
-          select: { id: true, rut: true, nombre: true, rol: true, correo: true, telefono: true },
+        supervisores: {
+          select: { id: true, rut: true, nombre: true, rol: true, cargo: true, email: true, telefono: true },
           orderBy: { nombre: 'asc' },
         },
       },
     });
 
-    if (!centro) throw new NotFoundException('Centro educativo no encontrado');
+    if (!centro) throw new NotFoundException('Empresa no encontrada');
     return centro;
   }
 
   async update(id: number, dto: UpdateCentroDto) {
     try {
-      return await this.prisma.centroEducativo.update({ where: { id }, data: dto });
+      // Mapear DTO a los campos de Empresa
+      const data: any = {};
+      if (dto.rut !== undefined) data.rut = dto.rut;
+      if (dto.razonSocial !== undefined) data.razonSocial = dto.razonSocial;
+      if (dto.nombreFantasia !== undefined) data.nombreFantasia = dto.nombreFantasia;
+      if (dto.tipo !== undefined) data.tipo = dto.tipo;
+      if (dto.tamano !== undefined) data.tamano = dto.tamano;
+      if (dto.region !== undefined) data.region = dto.region;
+      if (dto.comuna !== undefined) data.comuna = dto.comuna;
+      if (dto.direccion !== undefined) data.direccion = dto.direccion;
+      if (dto.telefono !== undefined) data.telefono = dto.telefono;
+      if (dto.email !== undefined) data.email = dto.email;
+      if (dto.sitioWeb !== undefined) data.sitioWeb = dto.sitioWeb;
+      if (dto.estado !== undefined) data.estado = dto.estado;
+      if (dto.observaciones !== undefined) data.observaciones = dto.observaciones;
+      
+      return await this.prisma.empresa.update({ where: { id }, data });
     } catch {
-      throw new NotFoundException('Centro educativo no encontrado');
+      throw new NotFoundException('Empresa no encontrada');
     }
   }
 
   async remove(id: number) {
     try {
-      return await this.prisma.centroEducativo.delete({ where: { id } });
+      return await this.prisma.empresa.delete({ where: { id } });
     } catch {
-      throw new NotFoundException('Centro educativo no encontrado');
+      throw new NotFoundException('Empresa no encontrada');
     }
   }
 }

@@ -41,7 +41,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   private platformId = inject(PLATFORM_ID);
 
   isSidenavOpened = true;
-  appTitle = 'Sistema de Prácticas';
+  appTitle = 'Gestión de Prácticas Empresariales';
 
   user = { name: 'Invitado', roleLabel: 'Sin rol', icon: 'account_circle' };
   /** Se muestra como “Funciones del rol” */
@@ -100,7 +100,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   // ------- Helpers -------
   private mapRoleLabel(id: RoleId): string {
     switch (id) {
-      case 'jefatura':    return 'Jefatura de Carrera';
+      case 'jefatura':    return 'Jefatura de Carrera Universitaria';
       case 'vinculacion': return 'Coordinador/a de Vinculación';
       case 'practicas':   return 'Coordinador/a de Prácticas';
       default:            return 'Sin rol';
@@ -128,16 +128,15 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     if (id === 'practicas') {
-      // Gestionar centros, estudiantes, prácticas, colaboradores, reportes/historial
+      // Gestionar empresas, estudiantes, prácticas, supervisores, reportes/historial
       const items: NavItem[] = [
         { label: 'Dashboard',       icon: 'dashboard', route: '/dashboard' },
         { label: 'Estudiantes',     icon: 'school',    route: '/estudiantes' },
-        { label: 'Colaboradores',   icon: 'groups',    route: '/colaboradores' },
-        { label: 'Prácticas',       icon: 'event_note',route: '/practicas' },     // crea la ruta si aún no existe
-        { label: 'Reportes/Historial', icon: 'timeline', route: '/reportes' },    // crea la ruta si aún no existe
+        { label: 'Empresas',        icon: 'business',  route: '/centros-educativos' },
+        { label: 'Supervisores',    icon: 'groups',    route: '/colaboradores' },
+        { label: 'Prácticas',       icon: 'work',      route: '/practicas' },
+        { label: 'Reportes/Historial', icon: 'timeline', route: '/reportes' },
       ];
-      // Si ya tienes /centros, lo dejamos visible:
-      items.splice(3, 0, { label: 'Centros educativos', icon: 'domain', route: '/centros-educativos' }); // opcional
       return items;
     }
 

@@ -4,18 +4,29 @@ import { Observable } from 'rxjs';
 
 const API_URL = 'http://localhost:3000/colaboradores';
 
+export type RolSupervisor = 'SUPERVISOR_DIRECTO' | 'TUTOR_ACADEMICO' | 'COORDINADOR' | 'EVALUADOR';
+
 export interface Colaborador {
   id: number;
   rut: string;
   nombre: string;
-  correo?: string;
-  telefono?: number;
-  tipo?: 'Colaborador' | 'Supervisor' | 'Tallerista';
+  email: string;
+  telefono?: string;
+  rol: RolSupervisor;
   cargo?: string;
-  universidad_egreso?: string;
-  direccion?: string;
+  area?: string;
+  profesion?: string;
+  aniosExperiencia?: number;
+  empresaId: number;
+  activo?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  
+  // Campos de compatibilidad temporal (deprecados)
+  correo?: string; // usar email
+  tipo?: string; // usar rol
+  direccion?: string;
+  universidad_egreso?: string; // usar profesion
 }
 
 export interface ColaboradorResponse {
@@ -27,7 +38,8 @@ export interface ColaboradorResponse {
 }
 
 export interface QueryColaboradorParams {
-  tipo?: 'Colaborador' | 'Supervisor' | 'Tallerista';
+  rol?: RolSupervisor;
+  empresaId?: number;
   search?: string;
   page?: number;
   limit?: number;

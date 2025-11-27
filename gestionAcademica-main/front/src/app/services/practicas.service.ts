@@ -12,47 +12,59 @@ export interface Estudiante {
   telefono?: string;
 }
 
-export interface CentroEducativo {
+export interface Empresa {
   id: number;
-  nombre: string;
-  direccion?: string;
+  razonSocial: string;
+  nombreFantasia?: string;
   tipo?: string;
   region?: string;
   comuna?: string;
-  convenio?: string;
+  
+  // Campos de compatibilidad temporal (deprecados)
+  nombre?: string; // usar razonSocial
 }
 
-export interface Colaborador {
+export interface Supervisor {
   id: number;
   nombre: string;
-  correo?: string;
-  tipo?: string;
+  email?: string;
+  rol?: string;
   cargo?: string;
-  telefono?: number;
+  telefono?: string;
+  
+  // Campos de compatibilidad temporal (deprecados)
+  correo?: string; // usar email
+  tipo?: string; // usar rol
 }
+
+// Alias para compatibilidad temporal
+export type CentroEducativo = Empresa;
+export type Colaborador = Supervisor;
 
 export type EstadoPractica = 'PENDIENTE' | 'EN_CURSO' | 'FINALIZADA' | 'RECHAZADA';
 
 export interface Practica {
   id: number;
   estado: EstadoPractica;
-  fecha_inicio: string;
-  fecha_termino?: string;
+  fechaInicio: string;
+  fechaTermino?: string;
   tipo?: string;
+  carrera?: string;
   estudiante?: Estudiante;
-  centro?: CentroEducativo;
-  colaborador?: Colaborador;
+  empresa?: Empresa;
+  supervisor?: Supervisor;
   createdAt?: string;
   updatedAt?: string;
 }
 
 export interface CreatePracticaDto {
-  estudianteRut: string;
-  centroId: number;
-  colaboradorId: number;
-  fecha_inicio: string;
-  fecha_termino?: string;
+  estudianteId: number;
+  empresaId: number;
+  supervisorId: number;
+  fechaInicio: string;
+  fechaTermino?: string;
   tipo?: string;
+  carrera?: string;
   estado?: EstadoPractica;
 }
 

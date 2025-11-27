@@ -13,20 +13,20 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 // Servicios y tipos
-import { ColaboradoresService, Colaborador } from '../../services/colaboradores.service';
-
-type TipoColaborador = 'Colaborador' | 'Supervisor' | 'Tallerista';
+import { ColaboradoresService, Colaborador, RolSupervisor } from '../../services/colaboradores.service';
 
 // Interfaz local para el formulario (compatible con la API)
 interface ColaboradorForm {
   rut: string;
   nombre: string;
-  correo?: string;
-  telefono?: string | number;
-  tipo?: TipoColaborador;
+  email?: string;
+  telefono?: string;
+  rol?: RolSupervisor;
   cargo?: string;
-  universidad_egreso?: string;
-  direccion?: string;
+  area?: string;
+  profesion?: string;
+  aniosExperiencia?: number;
+  empresaId?: number;
 }
 
 @Component({
@@ -59,7 +59,7 @@ export class ColaboradoresComponent {
 
   // Filtros
   terminoBusqueda = '';
-  rolSeleccionado: 'all' | TipoColaborador = 'all';
+  rolSeleccionado: 'all' | RolSupervisor = 'all';
 
   // Formulario reactivo
   formularioColaborador!: FormGroup;
@@ -118,12 +118,14 @@ export class ColaboradoresComponent {
     this.formularioColaborador = this.fb.group({
       rut: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20), this.validarRut]],
       nombre: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(120)]],
-      correo: ['', [Validators.email]],
+      email: ['', [Validators.email]],
       telefono: ['', [this.validarTelefono]],
-      direccion: [''],
-      tipo: ['Colaborador', [Validators.required]],
+      rol: ['SUPERVISOR_DIRECTO', [Validators.required]],
       cargo: [''],
-      universidad_egreso: ['']
+      area: [''],
+      profesion: [''],
+      aniosExperiencia: ['', [Validators.min(0), Validators.max(99)]],
+      empresaId: ['', [Validators.required]]
     });
   }
 
@@ -201,24 +203,28 @@ export class ColaboradoresComponent {
     const datosParaEnviar: any = {
       rut: valores.rut?.trim(),
       nombre: valores.nombre?.trim(),
-      tipo: valores.tipo || 'Colaborador'
+      rol: valores.rol || 'SUPERVISOR_DIRECTO',
+      empresaId: Number(valores.empresaId)
     };
 
     // Agregar campos opcionales solo si tienen valor
-    if (valores.correo?.trim()) {
-      datosParaEnviar.correo = valores.correo.trim();
+    if (valores.email?.trim()) {
+      datosParaEnviar.email = valores.email.trim();
     }
-    if (valores.telefono) {
-      datosParaEnviar.telefono = Number(valores.telefono);
-    }
-    if (valores.direccion?.trim()) {
-      datosParaEnviar.direccion = valores.direccion.trim();
+    if (valores.telefono?.trim()) {
+      datosParaEnviar.telefono = valores.telefono.trim();
     }
     if (valores.cargo?.trim()) {
       datosParaEnviar.cargo = valores.cargo.trim();
     }
-    if (valores.universidad_egreso?.trim()) {
-      datosParaEnviar.universidad_egreso = valores.universidad_egreso.trim();
+    if (valores.area?.trim()) {
+      datosParaEnviar.area = valores.area.trim();
+    }
+    if (valores.profesion?.trim()) {
+      datosParaEnviar.profesion = valores.profesion.trim();
+    }
+    if (valores.aniosExperiencia) {
+      datosParaEnviar.aniosExperiencia = Number(valores.aniosExperiencia);
     }
 
     this.colaboradoresService.crear(datosParaEnviar).subscribe({
@@ -301,28 +307,28 @@ export class ColaboradoresComponent {
       resultado = resultado.filter(colaborador => {
         // Buscar en múltiples campos de forma inteligente
         const nombre = (colaborador.nombre || '').toLowerCase();
-        const correo = (colaborador.correo || '').toLowerCase();
+        const email = (colaborador.email || '').toLowerCase();
         const cargo = (colaborador.cargo || '').toLowerCase();
         const rut = (colaborador.rut || '').toLowerCase();
-        const direccion = (colaborador.direccion || '').toLowerCase();
-        const universidad = (colaborador.universidad_egreso || '').toLowerCase();
-        const tipo = (colaborador.tipo || '').toLowerCase();
+        const area = (colaborador.area || '').toLowerCase();
+        const profesion = (colaborador.profesion || '').toLowerCase();
+        const rol = (colaborador.rol || '').toLowerCase();
 
         return (
           nombre.includes(termino) ||
-          correo.includes(termino) ||
+          email.includes(termino) ||
           cargo.includes(termino) ||
           rut.includes(termino) ||
-          direccion.includes(termino) ||
-          universidad.includes(termino) ||
-          tipo.includes(termino)
+          area.includes(termino) ||
+          profesion.includes(termino) ||
+          rol.includes(termino)
         );
       });
     }
 
     // Filtrar por rol
     if (this.rolSeleccionado !== 'all') {
-      resultado = resultado.filter(colaborador => colaborador.tipo === this.rolSeleccionado);
+      resultado = resultado.filter(colaborador => colaborador.rol === this.rolSeleccionado);
     }
 
     return resultado;
@@ -344,12 +350,14 @@ export class ColaboradoresComponent {
     this.formularioColaborador.patchValue({
       rut: colaborador.rut || '',
       nombre: colaborador.nombre || '',
-      correo: colaborador.correo || '',
-      tipo: colaborador.tipo || 'Colaborador',
+      email: colaborador.email || '',
+      rol: colaborador.rol || 'SUPERVISOR_DIRECTO',
       cargo: colaborador.cargo || '',
-      universidad_egreso: colaborador.universidad_egreso || '',
+      area: colaborador.area || '',
+      profesion: colaborador.profesion || '',
+      aniosExperiencia: colaborador.aniosExperiencia || '',
       telefono: colaborador.telefono || '',
-      direccion: colaborador.direccion || ''
+      empresaId: colaborador.empresaId || ''
     });
     
     this.mostrarFormulario = true;
@@ -383,24 +391,28 @@ export class ColaboradoresComponent {
     const datosParaEnviar: any = {
       rut: valores.rut?.trim(),
       nombre: valores.nombre?.trim(),
-      tipo: valores.tipo || 'Colaborador'
+      rol: valores.rol || 'SUPERVISOR_DIRECTO',
+      empresaId: Number(valores.empresaId)
     };
 
     // Agregar campos opcionales solo si tienen valor
-    if (valores.correo?.trim()) {
-      datosParaEnviar.correo = valores.correo.trim();
+    if (valores.email?.trim()) {
+      datosParaEnviar.email = valores.email.trim();
     }
-    if (valores.telefono) {
-      datosParaEnviar.telefono = Number(valores.telefono);
-    }
-    if (valores.direccion?.trim()) {
-      datosParaEnviar.direccion = valores.direccion.trim();
+    if (valores.telefono?.trim()) {
+      datosParaEnviar.telefono = valores.telefono.trim();
     }
     if (valores.cargo?.trim()) {
       datosParaEnviar.cargo = valores.cargo.trim();
     }
-    if (valores.universidad_egreso?.trim()) {
-      datosParaEnviar.universidad_egreso = valores.universidad_egreso.trim();
+    if (valores.area?.trim()) {
+      datosParaEnviar.area = valores.area.trim();
+    }
+    if (valores.profesion?.trim()) {
+      datosParaEnviar.profesion = valores.profesion.trim();
+    }
+    if (valores.aniosExperiencia) {
+      datosParaEnviar.aniosExperiencia = Number(valores.aniosExperiencia);
     }
 
     this.colaboradoresService.actualizar(colaboradorOriginal.id, datosParaEnviar).subscribe({

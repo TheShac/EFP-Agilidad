@@ -12,7 +12,8 @@ export class EstudianteService {
         rut: true,
         nombre: true,
         email: true,
-        fono: true,
+        telefono: true,  // Cambiado de 'fono'
+        carrera: true,
       },
     });
   }

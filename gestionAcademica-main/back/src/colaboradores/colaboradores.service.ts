@@ -9,27 +9,40 @@ export class ColaboradoresService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateColaboradorDto) {
-    // rut es único: si ya existe, prisma lanzará error único
-    return this.prisma.colaborador.create({ data: dto });
+    // Mapear DTO a los campos requeridos de SupervisorEmpresa
+    const data = {
+      rut: dto.rut,
+      nombre: dto.nombre,
+      email: dto.email,
+      telefono: dto.telefono,
+      rol: dto.rol,
+      cargo: dto.cargo,
+      area: dto.area,
+      profesion: dto.profesion,
+      aniosExperiencia: dto.aniosExperiencia,
+      empresaId: dto.empresaId,
+    };
+    return this.prisma.supervisorEmpresa.create({ data });
   }
 
   async findAll(q: QueryColaboradorDto) {
-    const { tipo, search, page = 1, limit = 10, orderBy = 'nombre', orderDir = 'asc' } = q;
+    const { rol, empresaId, search, page = 1, limit = 10, orderBy = 'nombre', orderDir = 'asc' } = q;
     const where = {
-      ...(tipo ? { tipo } : {}),
+      ...(rol ? { rol } : {}),
+      ...(empresaId ? { empresaId } : {}),
       ...(search
         ? {
             OR: [
               { nombre: { contains: search, mode: 'insensitive' } },
               { rut: { contains: search, mode: 'insensitive' } },
-              { correo: { contains: search, mode: 'insensitive' } },
+              { email: { contains: search, mode: 'insensitive' } },
             ],
           }
         : {}),
     };
 
     const [items, total] = await this.prisma.$transaction([
-      this.prisma.colaborador.findMany({
+      this.prisma.supervisorEmpresa.findMany({
         where,
         orderBy: { [orderBy]: orderDir },
         skip: (page - 1) * limit,
@@ -38,14 +51,16 @@ export class ColaboradoresService {
           id: true,
           rut: true,
           nombre: true,
-          correo: true,
+          email: true,
           telefono: true,
-          tipo: true,
+          rol: true,
           cargo: true,
-          universidad_egreso: true,
+          area: true,
+          profesion: true,
+          empresaId: true,
         },
       }),
-      this.prisma.colaborador.count({ where }),
+      this.prisma.supervisorEmpresa.count({ where }),
     ]);
 
     return {
@@ -58,28 +73,28 @@ export class ColaboradoresService {
   }
 
   async verPracticas(id: number) {
-    const col = await this.prisma.colaborador.findUnique({
+    const col = await this.prisma.supervisorEmpresa.findUnique({
       where: { id },
       include: {
-        practicas: {
+        practicasAsignadas: {
           select: {
             id: true,
             estado: true,
-            fecha_inicio: true,
-            fecha_termino: true,
+            fechaInicio: true,
+            fechaTermino: true,
             estudiante: { select: { rut: true, nombre: true } },
-            centro: { select: { id: true, nombre: true, comuna: true } },
+            empresa: { select: { id: true, razonSocial: true, nombreFantasia: true, comuna: true } },
           },
         },
       },
     });
-    if (!col) throw new NotFoundException('Colaborador no encontrado');
+    if (!col) throw new NotFoundException('Supervisor no encontrado');
     return col;
   }
 
   async update(id: number, dto: UpdateColaboradorDto) {
     try {
-      return await this.prisma.colaborador.update({ where: { id }, data: dto });
+      return await this.prisma.supervisorEmpresa.update({ where: { id }, data: dto });
     } catch {
       throw new NotFoundException('Colaborador no encontrado');
     }
@@ -88,7 +103,7 @@ export class ColaboradoresService {
   // Si prefieres borrado lógico, cambia por update({data:{activo:false}})
   async remove(id: number) {
     try {
-      return await this.prisma.colaborador.delete({ where: { id } });
+      return await this.prisma.supervisorEmpresa.delete({ where: { id } });
     } catch {
       throw new NotFoundException('Colaborador no encontrado');
     }

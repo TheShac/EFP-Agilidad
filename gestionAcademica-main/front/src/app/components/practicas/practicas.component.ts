@@ -331,18 +331,17 @@ export class PracticasComponent {
       },
       centro: {
         id: p.centro?.id || 0,
-        nombre: p.centro?.nombre || '',
-        direccion: p.centro?.direccion,
+        razonSocial: p.centro?.razonSocial || '',
+        nombreFantasia: p.centro?.nombreFantasia,
         tipo: p.centro?.tipo,
         region: p.centro?.region,
-        comuna: p.centro?.comuna,
-        convenio: p.centro?.convenio
+        comuna: p.centro?.comuna
       },
       colaborador: {
         id: p.colaborador?.id || 0,
         nombre: p.colaborador?.nombre || '',
-        correo: p.colaborador?.correo,
-        tipo: p.colaborador?.tipo,
+        email: p.colaborador?.email,
+        rol: p.colaborador?.rol,
         cargo: p.colaborador?.cargo,
         telefono: p.colaborador?.telefono
       },
@@ -430,7 +429,8 @@ export class PracticasComponent {
     if (!filtro) filtrados = this.centros.slice(0, 5);
     else {
       filtrados = this.centros.filter(c =>
-        c.nombre.toLowerCase().includes(filtro) ||
+        c.razonSocial?.toLowerCase().includes(filtro) ||
+        c.nombreFantasia?.toLowerCase().includes(filtro) ||
         c.comuna?.toLowerCase().includes(filtro) ||
         c.region?.toLowerCase().includes(filtro)
       ).slice(0, 5);
@@ -445,8 +445,9 @@ export class PracticasComponent {
     else {
       filtrados = this.colaboradores.filter(c =>
         c.nombre.toLowerCase().includes(filtro) ||
-        (c.tipo && c.tipo.toLowerCase().includes(filtro)) ||
-        (c.cargo && c.cargo.toLowerCase().includes(filtro))
+        (c.rol && c.rol.toLowerCase().includes(filtro)) ||
+        (c.cargo && c.cargo.toLowerCase().includes(filtro)) ||
+        (c.email && c.email.toLowerCase().includes(filtro))
       ).slice(0, 5);
     }
     this.colaboradorFiltrado = filtrados;
@@ -473,14 +474,14 @@ export class PracticasComponent {
     if (typeof value === 'string') {
       const id = parseInt(value);
       const c = this.centros.find(x => x.id === id);
-      return c ? `${c.nombre} - ${c.comuna}, ${c.region}` : '';
+      return c ? `${c.razonSocial} - ${c.comuna}, ${c.region}` : '';
     }
     if (typeof value === 'number') {
       const c = this.centros.find(x => x.id === value);
-      return c ? `${c.nombre} - ${c.comuna}, ${c.region}` : '';
+      return c ? `${c.razonSocial} - ${c.comuna}, ${c.region}` : '';
     }
     if (typeof value === 'object' && value.id) {
-      return `${value.nombre} - ${value.comuna}, ${value.region}`;
+      return `${value.razonSocial || value.nombreFantasia || 'Sin nombre'} - ${value.comuna}, ${value.region}`;
     }
     return '';
   }

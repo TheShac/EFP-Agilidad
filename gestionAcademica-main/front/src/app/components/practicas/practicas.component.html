@@ -2,16 +2,16 @@
   <!-- HEADER -->
   <div class="Header">
     <div class="Headline">
-      <h1>Asignación de Prácticas</h1>
-      <p class="Muted">Gestión de asignaciones de practicas para los estudiantes</p>
+      <h1>Gestión de Prácticas Profesionales</h1>
+      <p class="Muted">Asignación y seguimiento de prácticas empresariales para estudiantes universitarios</p>
     </div>
 
     <div class="Spacer"></div>
 
     <!-- BOTÓN NUEVA ASIGNACIÓN -->
     <button mat-flat-button color="primary" (click)="abrirNuevaAsignacion()" class="BtnAdd">
-      <mat-icon>person_add</mat-icon>
-      Nueva Asignación
+      <mat-icon>assignment_add</mat-icon>
+      Nueva Asignación de Práctica
     </button>
   </div>
 
@@ -27,21 +27,21 @@
       <div class="FiltersGrid">
         <mat-form-field appearance="outline" class="SearchField">
           <mat-label>Buscar</mat-label>
-          <input matInput [(ngModel)]="terminoBusqueda" placeholder="Nombre, RUT o colegio..." />
+          <input matInput [(ngModel)]="terminoBusqueda" placeholder="Nombre estudiante, RUT o empresa..." />
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
         
         <!-- Nuevo filtro: Nivel (Plan) -->
         <mat-form-field appearance="outline" class="FilterField">
-          <mat-label>Nivel</mat-label>
+          <mat-label>Nivel/Carrera</mat-label>
           <mat-select [(ngModel)]="nivelSeleccionado">
-            <mat-option value="all">Todos los niveles</mat-option>
+            <mat-option value="all">Todas las carreras</mat-option>
             <mat-option *ngFor="let n of niveles" [value]="n">{{ n }}</mat-option>
           </mat-select>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="FilterField">
-          <mat-label>Tipo de Centro Educativo</mat-label>
+          <mat-label>Tipo de Empresa</mat-label>
           <mat-select [(ngModel)]="colegioSeleccionado">
             <mat-select-trigger>
               {{ colegioSeleccionado === 'all' ? 'Todos los tipos' : (colegioSeleccionado | lowercase) }}
@@ -396,10 +396,6 @@
                   <label>Tipo:</label>
                   <span>{{ practicaSeleccionada.centro.tipo || 'Sin especificar' }}</span>
                 </div>
-                <div class="DetailItem">
-                  <label>Dirección:</label>
-                  <span>{{ practicaSeleccionada.centro.direccion || 'Sin especificar' }}</span>
-                </div>
               </div>
             </div>
 
@@ -416,11 +412,11 @@
                 </div>
                 <div class="DetailItem">
                   <label>Email:</label>
-                  <span>{{ practicaSeleccionada.colaborador.correo || 'Sin especificar' }}</span>
+                  <span>{{ practicaSeleccionada.colaborador.email || 'Sin especificar' }}</span>
                 </div>
                 <div class="DetailItem">
-                  <label>Tipo:</label>
-                  <span>{{ practicaSeleccionada.colaborador.tipo || 'Sin especificar' }}</span>
+                  <label>Rol:</label>
+                  <span>{{ practicaSeleccionada.colaborador.rol || 'Sin especificar' }}</span>
                 </div>
                 <div class="DetailItem">
                   <label>Cargo:</label>

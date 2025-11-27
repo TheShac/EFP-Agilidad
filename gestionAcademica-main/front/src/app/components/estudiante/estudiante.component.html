@@ -3,7 +3,7 @@
     <button mat-stroked-button color="primary" routerLink="/dashboard" class="btn-back">
       <mat-icon>arrow_back</mat-icon> Volver al Dashboard
     </button>
-    <h1>Lista de Estudiantes ({{ filtered().length }})</h1>
+    <h1>Estudiantes Universitarios ({{ filtered().length }})</h1>
     <div class="spacer"></div>
   </div>
 
@@ -11,7 +11,7 @@
   <mat-card class="elev">
     <mat-card-content>
       <mat-form-field class="w-100" appearance="outline">
-        <mat-label>Buscar por nombre, RUT o código…</mat-label>
+        <mat-label>Buscar por nombre, RUT, código o carrera…</mat-label>
         <input matInput [(ngModel)]="searchTerm" />
       </mat-form-field>
     </mat-card-content>
@@ -22,7 +22,7 @@
     <mat-card-content>
       <div *ngIf="!filtered().length" class="empty">
         <mat-icon>school</mat-icon>
-        <p>No hay estudiantes registrados</p>
+        <p>No hay estudiantes universitarios registrados</p>
       </div>
 
       <div *ngFor="let s of filtered()" class="row">

@@ -58,9 +58,9 @@ export class DashboardComponent implements OnInit {
 
   private mapRoleLabel(id: RoleId) {
     switch (id) {
-      case 'jefatura':    return 'Jefatura de Carrera';
+      case 'jefatura':    return 'Jefatura de Carrera Universitaria';
       case 'vinculacion': return 'Coordinador/a de Vinculación';
-      case 'practicas':  return 'Coordinador/a de practicas';
+      case 'practicas':  return 'Coordinador/a de Prácticas';
     }
   }
 
@@ -74,27 +74,27 @@ export class DashboardComponent implements OnInit {
 
     if (id === 'jefatura') {
       return [
-        { title: 'Usuarios', icon: 'manage_accounts', route: '/usuarios', desc: 'Roles y permisos' },
-        { title: 'Colaboradores', icon: 'groups', route: '/colaboradores', desc: 'Alta, filtros y perfiles' },
+        { title: 'Usuarios', icon: 'manage_accounts', route: '/usuarios', desc: 'Roles y permisos del sistema' },
+        { title: 'Supervisores', icon: 'groups', route: '/colaboradores', desc: 'Gestión de supervisores de empresa' },
         ...comunes
       ];
     }
 
     if (id === 'vinculacion') {
       return [
-        { title: 'Colegios', icon: 'location_city', route: '/colegios', desc: 'Administración de centros educacionales' },
-        { title: 'Colaboradores', icon: 'groups', route: '/colaboradores', desc: 'Alta, filtros y perfiles' },
+        { title: 'Empresas', icon: 'business', route: '/centros-educativos', desc: 'Gestión de empresas colaboradoras' },
+        { title: 'Supervisores', icon: 'groups', route: '/colaboradores', desc: 'Supervisores de prácticas empresariales' },
         ...comunes
       ];
     }
  //Sprint 1 (solo este esta revisado)
     if (id === 'practicas') {
       return [
-        { title: 'Estudiantes', icon: 'school', route: '/estudiantes', desc: 'Seguimiento asignado' },
-        { title: 'Centros educativos', icon: 'domain', route: '/centros-educativos', desc: 'Actividades recientes' },
-        { title: 'Prácticas', icon: 'event_note', route: '/practicas', desc: 'Actividades recientes' },
-        { title: 'Colaboradores', icon: 'groups', route: '/colaboradores', desc: 'Actividades recientes' },
-        { title: 'Reportes/Historial', icon: 'timeline', route: '/reportes', desc: 'Actividades recientes' },
+        { title: 'Estudiantes Universitarios', icon: 'school', route: '/estudiantes', desc: 'Gestión de estudiantes en práctica' },
+        { title: 'Empresas', icon: 'business', route: '/centros-educativos', desc: 'Empresas colaboradoras del programa' },
+        { title: 'Prácticas Profesionales', icon: 'work', route: '/practicas', desc: 'Asignación y seguimiento de prácticas' },
+        { title: 'Supervisores', icon: 'groups', route: '/colaboradores', desc: 'Supervisores de empresa' },
+        { title: 'Reportes/Historial', icon: 'timeline', route: '/reportes', desc: 'Historial y estadísticas' },
         
         ...comunes.filter(c => c.title !== 'Usuarios')
       ];

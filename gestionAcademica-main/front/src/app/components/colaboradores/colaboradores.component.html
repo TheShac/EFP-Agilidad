@@ -3,8 +3,8 @@
   <div class="Header">
     
     <div class="Headline">
-      <h1>Gestión de Colaboradores</h1>
-      <p class="Muted">Gestión de Supervisores, Talleristas y Colaboradores</p>
+      <h1>Gestión de Supervisores de Empresa</h1>
+      <p class="Muted">Administración de supervisores y tutores de prácticas empresariales</p>
     </div>
 
     <div class="Spacer"></div>
@@ -12,7 +12,7 @@
     <!-- BOTÓN AGREGAR -->
     <button mat-flat-button color="primary" (click)="alternarFormulario()" class="BtnAdd">
       <mat-icon>{{ mostrarFormulario ? 'close' : 'person_add' }}</mat-icon>
-      {{ mostrarFormulario ? 'Cerrar' : 'Agregar colaborador' }}
+      {{ mostrarFormulario ? 'Cerrar' : 'Agregar supervisor' }}
     </button>
   </div>
 
@@ -33,12 +33,13 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="FilterField">
-          <mat-label>Rol</mat-label>
+          <mat-label>Rol del Supervisor</mat-label>
         <mat-select [(ngModel)]="rolSeleccionado" (selectionChange)="aplicarFiltros()">
             <mat-option value="all">Todos los roles</mat-option>
-          <mat-option value="Supervisor">Supervisor</mat-option>
-          <mat-option value="Colaborador">Colaborador</mat-option>
-          <mat-option value="Tallerista">Tallerista</mat-option>
+          <mat-option value="SUPERVISOR_DIRECTO">Supervisor Directo</mat-option>
+          <mat-option value="TUTOR_ACADEMICO">Tutor Académico</mat-option>
+          <mat-option value="COORDINADOR">Coordinador</mat-option>
+          <mat-option value="EVALUADOR">Evaluador</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
@@ -55,8 +56,8 @@
               <mat-icon>{{ estaEditando ? 'edit' : 'person_add' }}</mat-icon>
             </div>
           <div class="FormTitles">
-            <h2>{{ estaEditando ? 'Editar colaborador' : 'Agregar colaborador' }}</h2>
-            <p>{{ estaEditando ? 'Modifica los datos del colaborador' : 'Completa los datos para registrar un nuevo colaborador' }}</p>
+            <h2>{{ estaEditando ? 'Editar supervisor' : 'Registrar supervisor de empresa' }}</h2>
+            <p>{{ estaEditando ? 'Modifica los datos del supervisor' : 'Completa los datos para registrar un nuevo supervisor' }}</p>
           </div>
           </div>
           <button mat-icon-button (click)="alternarFormulario()" class="CloseFormBtn">
@@ -87,8 +88,8 @@
             <div class="FormRow">
               <mat-form-field appearance="outline" class="FormField">
                 <mat-label>Email</mat-label>
-                <input matInput formControlName="correo" type="email" placeholder="correo@ejemplo.com" />
-                @if (formularioColaborador.get('correo')?.invalid && formularioColaborador.get('correo')?.touched) {
+                <input matInput formControlName="email" type="email" placeholder="email@ejemplo.com" />
+                @if (formularioColaborador.get('email')?.invalid && formularioColaborador.get('email')?.touched) {
                   <mat-error>{{ getErrorCorreo() }}</mat-error>
                 }
               </mat-form-field>
@@ -112,10 +113,11 @@
             <div class="FormRow">
               <mat-form-field appearance="outline" class="FormField">
                 <mat-label>Rol *</mat-label>
-                <mat-select formControlName="tipo">
-                  <mat-option value="Colaborador">Colaborador</mat-option>
-                  <mat-option value="Supervisor">Supervisor</mat-option>
-                  <mat-option value="Tallerista">Tallerista</mat-option>
+                <mat-select formControlName="rol">
+                  <mat-option value="SUPERVISOR_DIRECTO">Supervisor Directo</mat-option>
+                  <mat-option value="TUTOR_ACADEMICO">Tutor Académico</mat-option>
+                  <mat-option value="COORDINADOR">Coordinador</mat-option>
+                  <mat-option value="EVALUADOR">Evaluador</mat-option>
                 </mat-select>
               </mat-form-field>
 
@@ -162,13 +164,13 @@
             <div class="ItemMain">
               <div class="ItemInfo">
                 <h3>{{ c.nombre }}</h3>
-                  <p class="Muted">{{ c.correo || 'Sin email' }}</p>
+                  <p class="Muted">{{ c.email || 'Sin email' }}</p>
                 </div>
             </div>
 
             <!-- Rol y cargo -->
             <div class="ItemRole">
-                <strong>{{ c.tipo || 'Sin rol' }}</strong>
+                <strong>{{ c.rol || 'Sin rol' }}</strong>
                 @if (c.cargo) {
                   <span> · {{ c.cargo }}</span>
               }
