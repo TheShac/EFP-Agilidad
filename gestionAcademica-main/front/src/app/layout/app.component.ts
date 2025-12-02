@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, AfterViewInit, PLATFORM_ID } from '@angular/core';
+import { Component, inject, OnInit, AfterViewInit, PLATFORM_ID, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -36,9 +36,14 @@ interface NavItem { label: string; icon: string; route: string; }
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit, AfterViewInit {
+export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  @ViewChild(MatSidenav) sidenav?: MatSidenav;
+  private closeSidenavListener = () => {
+    this.isSidenavOpened = false;
+    this.sidenav?.close();
+  };
 
   isSidenavOpened = true;
   appTitle = 'Sistema de Prácticas';
@@ -53,6 +58,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.applyRole('practicas'); // fallback visual para SSR
     if (isPlatformBrowser(this.platformId)) {
+      window.addEventListener('app:close-sidenav', this.closeSidenavListener);
       this.loadRoleFromStorage();
       // Suscribirse a cambios de navegación para detectar cuando se selecciona un nuevo rol
       this.router.events
@@ -90,11 +96,18 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   // ------- UI -------
+  onSidenavChange(opened: boolean) { this.isSidenavOpened = opened; }
   toggleSidenav(sidenav: MatSidenav) { sidenav.toggle(); }
 
   logout() {
     if (isPlatformBrowser(this.platformId)) localStorage.removeItem('app.selectedRole');
     this.router.navigateByUrl('/');
+  }
+
+  ngOnDestroy(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      window.removeEventListener('app:close-sidenav', this.closeSidenavListener);
+    }
   }
 
   // ------- Helpers -------
@@ -110,9 +123,14 @@ export class AppComponent implements OnInit, AfterViewInit {
   /** Construye el menú del sidebar según funciones reales por rol */
   private buildNav(id: RoleId): NavItem[] {
     if (id === 'jefatura') {
-      // Reportes completos + Generar cartas + Supervisión general
+      // Reportes completos + Generar cartas + Supervisión general + Estudiantes en práctica + Usuarios + Tutores + Colaboradores + Actividades (solo lectura)
       return [
         { label: 'Dashboard',          icon: 'dashboard',    route: '/dashboard' },
+        { label: 'Usuarios',           icon: 'manage_accounts', route: '/usuarios' },
+        { label: 'Estudiantes en práctica', icon: 'school',  route: '/estudiantes-en-practica' },
+        { label: 'Tutores',            icon: 'supervisor_account', route: '/tutores' },
+        { label: 'Colaboradores',      icon: 'groups',       route: '/colaboradores' },
+        { label: 'Actividades',        icon: 'assignment',   route: '/actividades-estudiantes' },
         { label: 'Supervisión general',icon: 'insights',     route: '/supervision' },
         { label: 'Reportes completos', icon: 'analytics',    route: '/reportes' },
         { label: 'Generar solicitud',  icon: 'description',  route: '/carta' }, // crea la ruta si aún no existe
@@ -122,23 +140,26 @@ export class AppComponent implements OnInit, AfterViewInit {
     if (id === 'vinculacion') {
       // Registrar encuestas
       return [
-        { label: 'Dashboard',  icon: 'dashboard',  route: '/dashboard' },
-        { label: 'Encuestas',  icon: 'assignment', route: '/encuestas'  },
+        { label: 'Dashboard',          icon: 'dashboard',          route: '/dashboard' },
+        { label: 'Encuestas',          icon: 'assignment',         route: '/encuestas' },
+        { label: 'Estudiantes',        icon: 'school',             route: '/estudiantes' },
+        { label: 'Colaboradores',      icon: 'groups',             route: '/colaboradores' },
+        { label: 'Centros educativos', icon: 'domain',             route: '/centros-educativos' },
       ];
     }
 
     if (id === 'practicas') {
       // Gestionar centros, estudiantes, prácticas, colaboradores, reportes/historial
-      const items: NavItem[] = [
-        { label: 'Dashboard',       icon: 'dashboard', route: '/dashboard' },
-        { label: 'Estudiantes',     icon: 'school',    route: '/estudiantes' },
-        { label: 'Colaboradores',   icon: 'groups',    route: '/colaboradores' },
-        { label: 'Prácticas',       icon: 'event_note',route: '/practicas' },     // crea la ruta si aún no existe
-        { label: 'Reportes/Historial', icon: 'timeline', route: '/reportes' },    // crea la ruta si aún no existe
+      return [
+        { label: 'Dashboard',          icon: 'dashboard',          route: '/dashboard' },
+        { label: 'Estudiantes',        icon: 'school',             route: '/estudiantes' },
+        { label: 'Tutores',            icon: 'supervisor_account', route: '/tutores' },
+        { label: 'Colaboradores',      icon: 'groups',             route: '/colaboradores' },
+        { label: 'Centros educativos', icon: 'domain',             route: '/centros-educativos' },
+        { label: 'Prácticas',          icon: 'event_note',         route: '/practicas' },     // crea la ruta si aún no existe
+        { label: 'Actividades',        icon: 'assignment',         route: '/actividades-estudiantes' },
+        { label: 'Reportes/Historial', icon: 'timeline',           route: '/reportes' },     // crea la ruta si aún no existe
       ];
-      // Si ya tienes /centros, lo dejamos visible:
-      items.splice(3, 0, { label: 'Centros educativos', icon: 'domain', route: '/centros-educativos' }); // opcional
-      return items;
     }
 
     // Fallback si no calza

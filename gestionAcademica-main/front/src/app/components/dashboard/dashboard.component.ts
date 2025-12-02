@@ -75,7 +75,13 @@ export class DashboardComponent implements OnInit {
     if (id === 'jefatura') {
       return [
         { title: 'Usuarios', icon: 'manage_accounts', route: '/usuarios', desc: 'Roles y permisos' },
-        { title: 'Colaboradores', icon: 'groups', route: '/colaboradores', desc: 'Alta, filtros y perfiles' },
+        { title: 'Estudiantes en práctica', icon: 'school', route: '/estudiantes-en-practica', desc: 'Visualización de estudiantes en práctica' },
+        { title: 'Tutores', icon: 'supervisor_account', route: '/tutores', desc: 'Visualización de tutores' },
+        { title: 'Colaboradores', icon: 'groups', route: '/colaboradores', desc: 'Visualización de colaboradores' },
+        { title: 'Actividades', icon: 'assignment', route: '/actividades-estudiantes', desc: 'Visualización de actividades' },
+        { title: 'Supervisión general', icon: 'insights', route: '/supervision', desc: 'Indicadores y seguimiento' },
+        { title: 'Reportes completos', icon: 'analytics', route: '/reportes', desc: 'Reportes y estadísticas' },
+        { title: 'Generar solicitud', icon: 'description', route: '/carta', desc: 'Generar cartas de presentación' },
         ...comunes
       ];
     }
@@ -91,6 +97,7 @@ export class DashboardComponent implements OnInit {
     if (id === 'practicas') {
       return [
         { title: 'Estudiantes', icon: 'school', route: '/estudiantes', desc: 'Seguimiento asignado' },
+        { title: 'Tutores', icon: 'supervisor_account', route: '/tutores', desc: 'Actividades recientes' },
         { title: 'Centros educativos', icon: 'domain', route: '/centros-educativos', desc: 'Actividades recientes' },
         { title: 'Prácticas', icon: 'event_note', route: '/practicas', desc: 'Actividades recientes' },
         { title: 'Colaboradores', icon: 'groups', route: '/colaboradores', desc: 'Actividades recientes' },

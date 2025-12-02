@@ -1,7 +1,8 @@
-import { Component, inject, PLATFORM_ID } from '@angular/core';
+﻿import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+
+
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Router } from '@angular/router';
 
 // Angular Material
 import { MatButtonModule } from '@angular/material/button';
@@ -9,13 +10,11 @@ import { MatIconModule }   from '@angular/material/icon';
 import { MatCardModule }   from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule }  from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 
 // Servicios y tipos
 import { ColaboradoresService, Colaborador } from '../../services/colaboradores.service';
-
-type TipoColaborador = 'Colaborador' | 'Supervisor' | 'Tallerista';
 
 // Interfaz local para el formulario (compatible con la API)
 interface ColaboradorForm {
@@ -23,8 +22,8 @@ interface ColaboradorForm {
   nombre: string;
   correo?: string;
   telefono?: string | number;
-  tipo?: TipoColaborador;
-  cargo?: string;
+  cargo1?: string;
+  cargo2?: string;
   universidad_egreso?: string;
   direccion?: string;
 }
@@ -37,16 +36,15 @@ interface ColaboradorForm {
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule,
     MatButtonModule, MatIconModule, MatCardModule,
-    MatFormFieldModule, MatInputModule, MatSelectModule,
-    MatSnackBarModule
+    MatFormFieldModule, MatInputModule,
+    MatSnackBarModule, MatPaginatorModule
   ]
 })
-export class ColaboradoresComponent {
+export class ColaboradoresComponent implements OnInit {
   private snack = inject(MatSnackBar);
-  private router = inject(Router);
-  private platformId = inject(PLATFORM_ID);
   private colaboradoresService = inject(ColaboradoresService);
   private fb = inject(FormBuilder);
+  private platformId = inject(PLATFORM_ID);
 
   // Interfaz de usuario
   mostrarFormulario = false;
@@ -56,58 +54,96 @@ export class ColaboradoresComponent {
   mostrarConfirmarEliminar = false;
   colaboradorAEliminar: Colaborador | null = null;
   cargando = false;
+  soloLecturaVinculacion = false;
 
   // Filtros
   terminoBusqueda = '';
-  rolSeleccionado: 'all' | TipoColaborador = 'all';
 
   // Formulario reactivo
   formularioColaborador!: FormGroup;
+  
+  // Verificar si el usuario es jefatura (solo lectura)
+  get esJefatura(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    try {
+      const roleStr = localStorage.getItem('app.selectedRole');
+      if (!roleStr) return false;
+      const role = JSON.parse(roleStr);
+      return role?.id === 'jefatura';
+    } catch {
+      return false;
+    }
+  }
 
-  // Datos - todos los colaboradores sin filtrar
-  colaboradores: Colaborador[] = [];
-  todosLosColaboradores: Colaborador[] = []; // Lista completa para filtrado local
+  // ===== paginación (back) =====
+  pageIndex = 0;
+  pageSize = 5;
+  totalItems = 0;
+  readonly pageSizeOptions = [5, 10, 20, 50];
+
+  // Datos - todos los colaboradores cargados del backend
+  todosLosColaboradores: Colaborador[] = [];
 
   constructor() {
     this.inicializarFormulario();
-    this.cargarTodosLosColaboradores();
+    this.load();
   }
 
-  // Validador personalizado para RUT chileno (básico)
+  ngOnInit(): void {
+    this.soloLecturaVinculacion = this.esRolVinculacionSoloLectura();
+    if (this.soloLecturaVinculacion) {
+      this.mostrarFormulario = false;
+      this.estaEditando = false;
+    }
+  }
+
+  private esRolVinculacionSoloLectura(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    try {
+      const saved = localStorage.getItem('app.selectedRole');
+      if (!saved) return false;
+      const parsed = JSON.parse(saved);
+      return parsed?.id === 'vinculacion';
+    } catch {
+      return false;
+    }
+  }
+
+  // Validador personalizado para RUT chileno (bÃ¡sico)
   validarRut(control: AbstractControl): ValidationErrors | null {
     const rut = control.value;
     if (!rut) return null;
 
     const rutLimpio = rut.replace(/\./g, '').replace(/-/g, '').trim();
     
-    // Validar longitud (3-20 caracteres según backend)
+    // Validar longitud (3-20 caracteres segÃºn backend)
     if (rutLimpio.length < 3 || rutLimpio.length > 20) {
       return { rutInvalido: true, mensaje: 'RUT debe tener entre 3 y 20 caracteres' };
     }
 
-    // Validar que contenga solo números y posible K/k al final (formato flexible)
+    // Validar que contenga solo nÃºmeros y posible K/k al final (formato flexible)
     const rutRegex = /^[0-9]+[0-9kK]?$/;
     if (!rutRegex.test(rutLimpio)) {
-      return { rutInvalido: true, mensaje: 'RUT solo puede contener números y letra K (ej: 12345678-9 o 12345678-K)' };
+      return { rutInvalido: true, mensaje: 'RUT solo puede contener nÃºmeros y letra K (ej: 12345678-9 o 12345678-K)' };
     }
 
     return null;
   }
 
-  // Validador personalizado para teléfono (debe ser numérico)
+  // Validador personalizado para telÃ©fono (debe ser numÃ©rico)
   validarTelefono(control: AbstractControl): ValidationErrors | null {
     const telefono = control.value;
     if (!telefono) return null;
 
-    // Si es string, verificar que sean solo números
+    // Si es string, verificar que sean solo nÃºmeros
     if (typeof telefono === 'string' && !/^\d+$/.test(telefono)) {
-      return { telefonoInvalido: true, mensaje: 'El teléfono debe contener solo números' };
+      return { telefonoInvalido: true, mensaje: 'El telÃ©fono debe contener solo nÃºmeros' };
     }
 
-    // Verificar que sea un número positivo
+    // Verificar que sea un nÃºmero positivo
     const num = Number(telefono);
     if (isNaN(num) || num < 0) {
-      return { telefonoInvalido: true, mensaje: 'El teléfono debe ser un número válido' };
+      return { telefonoInvalido: true, mensaje: 'El telÃ©fono debe ser un nÃºmero vÃ¡lido' };
     }
 
     return null;
@@ -121,23 +157,25 @@ export class ColaboradoresComponent {
       correo: ['', [Validators.email]],
       telefono: ['', [this.validarTelefono]],
       direccion: [''],
-      tipo: ['Colaborador', [Validators.required]],
-      cargo: [''],
+      cargo1: [''],
+      cargo2: [''],
       universidad_egreso: ['']
     });
   }
 
-  // Cargar todos los colaboradores desde la API (sin filtros para búsqueda local)
-  cargarTodosLosColaboradores() {
+  // ===== carga lista desde backend (todos los items para filtrado local) =====
+  load() {
     this.cargando = true;
+    
     // Cargar un número grande de colaboradores para filtrar localmente
-    const params: any = { page: 1, limit: 1000 };
+    const params: any = { page: 1, limit: 1000, orderBy: 'nombre', orderDir: 'asc' };
 
     this.colaboradoresService.listar(params).subscribe({
       next: (response) => {
         this.todosLosColaboradores = response.items || [];
-        this.colaboradores = this.todosLosColaboradores;
         this.cargando = false;
+        // Actualizar totalItems basado en los filtrados
+        this.actualizarPaginacion();
       },
       error: (err) => {
         console.error('Error al cargar colaboradores:', err);
@@ -147,13 +185,20 @@ export class ColaboradoresComponent {
     });
   }
 
-  // Cargar colaboradores (para cuando se agrega/edita/elimina)
-  cargarColaboradores() {
-    this.cargarTodosLosColaboradores();
+  // Actualizar paginación cuando cambian los filtros o datos
+  actualizarPaginacion() {
+    this.totalItems = this.filtrados.length;
+    // Asegurar que pageIndex no exceda el número de páginas disponibles
+    const maxPage = Math.max(0, Math.ceil(this.totalItems / this.pageSize) - 1);
+    if (this.pageIndex > maxPage) {
+      this.pageIndex = maxPage;
+    }
   }
 
-  // Navegación
-  volverAtras() { this.router.navigate(['/dashboard']); }
+  // Cargar colaboradores (para cuando se agrega/edita/elimina)
+  cargarColaboradores() {
+    this.load();
+  }
 
   // Detalles
   verDetalles(colaborador: Colaborador) {
@@ -166,6 +211,7 @@ export class ColaboradoresComponent {
 
   // Interfaz de usuario
   alternarFormulario() { 
+    if (this.soloLecturaVinculacion) return;
     this.mostrarFormulario = !this.mostrarFormulario;
     if (!this.mostrarFormulario) {
       this.estaEditando = false;
@@ -181,6 +227,7 @@ export class ColaboradoresComponent {
 
   // Agregar
   agregarColaborador() {
+    if (this.soloLecturaVinculacion) return;
     // Marcar todos los campos como tocados para mostrar errores
     if (this.formularioColaborador.invalid) {
       this.formularioColaborador.markAllAsTouched();
@@ -195,13 +242,12 @@ export class ColaboradoresComponent {
       return;
     }
 
-    const valores = this.formularioColaborador.value;
+    const valores = this.formularioColaborador.value as ColaboradorForm;
 
     // Preparar datos para enviar a la API
     const datosParaEnviar: any = {
       rut: valores.rut?.trim(),
       nombre: valores.nombre?.trim(),
-      tipo: valores.tipo || 'Colaborador'
     };
 
     // Agregar campos opcionales solo si tienen valor
@@ -214,9 +260,10 @@ export class ColaboradoresComponent {
     if (valores.direccion?.trim()) {
       datosParaEnviar.direccion = valores.direccion.trim();
     }
-    if (valores.cargo?.trim()) {
-      datosParaEnviar.cargo = valores.cargo.trim();
-    }
+    const cargos: string[] = [valores.cargo1, valores.cargo2]
+      .filter((c): c is string => !!c && !!c.trim())
+      .map((c) => c.trim());
+    if (cargos.length) datosParaEnviar.cargos = cargos;
     if (valores.universidad_egreso?.trim()) {
       datosParaEnviar.universidad_egreso = valores.universidad_egreso.trim();
     }
@@ -224,7 +271,7 @@ export class ColaboradoresComponent {
     this.colaboradoresService.crear(datosParaEnviar).subscribe({
       next: () => {
         this.snack.open(
-          `✓ ${datosParaEnviar.nombre} agregado correctamente`, 
+          `${datosParaEnviar.nombre} agregado correctamente`, 
           'Cerrar', 
           { 
             duration: 4000,
@@ -235,7 +282,7 @@ export class ColaboradoresComponent {
         );
         this.resetearFormulario();
         this.mostrarFormulario = false;
-        this.cargarColaboradores();
+        this.load();
       },
       error: (err) => {
         console.error('Error al crear colaborador:', err);
@@ -257,16 +304,18 @@ export class ColaboradoresComponent {
 
   // Eliminar
   eliminar(c: Colaborador) {
+    if (this.soloLecturaVinculacion) return;
     this.colaboradorAEliminar = c;
     this.mostrarConfirmarEliminar = true;
   }
 
   confirmarEliminar() {
+    if (this.soloLecturaVinculacion) return;
     if (this.colaboradorAEliminar?.id) {
       this.colaboradoresService.eliminar(this.colaboradorAEliminar.id).subscribe({
         next: () => {
           this.snack.open(
-            `✓ ${this.colaboradorAEliminar!.nombre} eliminado exitosamente`, 
+            `${this.colaboradorAEliminar!.nombre} eliminado exitosamente`, 
             'Cerrar', 
             { 
               duration: 4000,
@@ -276,7 +325,14 @@ export class ColaboradoresComponent {
             }
           );
           this.cerrarConfirmarEliminar();
-          this.cargarColaboradores();
+          this.load();
+          // Ajustar página si es necesario después de eliminar
+          setTimeout(() => {
+            if (this.colaboradores.length === 0 && this.pageIndex > 0) {
+              this.pageIndex--;
+              this.actualizarPaginacion();
+            }
+          }, 100);
         },
         error: (err) => {
           console.error('Error al eliminar colaborador:', err);
@@ -291,7 +347,7 @@ export class ColaboradoresComponent {
     this.colaboradorAEliminar = null;
   }
 
-  // Filtros - aplicados localmente en el frontend
+  // ===== filtros - aplicados localmente en el frontend =====
   get filtrados(): Colaborador[] {
     let resultado = [...this.todosLosColaboradores];
 
@@ -306,7 +362,6 @@ export class ColaboradoresComponent {
         const rut = (colaborador.rut || '').toLowerCase();
         const direccion = (colaborador.direccion || '').toLowerCase();
         const universidad = (colaborador.universidad_egreso || '').toLowerCase();
-        const tipo = (colaborador.tipo || '').toLowerCase();
 
         return (
           nombre.includes(termino) ||
@@ -314,39 +369,53 @@ export class ColaboradoresComponent {
           cargo.includes(termino) ||
           rut.includes(termino) ||
           direccion.includes(termino) ||
-          universidad.includes(termino) ||
-          tipo.includes(termino)
+          universidad.includes(termino)
         );
       });
-    }
-
-    // Filtrar por rol
-    if (this.rolSeleccionado !== 'all') {
-      resultado = resultado.filter(colaborador => colaborador.tipo === this.rolSeleccionado);
     }
 
     return resultado;
   }
 
-  // Aplicar filtros (filtrado local, no recarga desde API)
-  aplicarFiltros() {
-    // El filtrado se hace automáticamente mediante el getter filtrados
-    // Este método se mantiene para compatibilidad con el evento selectionChange del select
+  // ===== items paginados de los filtrados =====
+  get colaboradores(): Colaborador[] {
+    const filtrados = this.filtrados;
+    const startIndex = this.pageIndex * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    return filtrados.slice(startIndex, endIndex);
   }
 
-  // Funciones de edición
+  // ===== orden, filtros y paginador =====
+  onFiltersChange() {
+    this.pageIndex = 0;
+    this.actualizarPaginacion();
+  }
+
+  onPageChange(event: PageEvent) {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    // No necesitamos recargar, solo actualizar la paginación
+    this.actualizarPaginacion();
+  }
+
+  // Funciones de ediciÃ³n
   editarColaborador(colaborador: Colaborador) {
+    if (this.soloLecturaVinculacion) return;
     this.estaEditando = true;
     this.colaboradorEditando = colaborador;
     this.colaboradorSeleccionado = null; // Cerrar modal
     
     // Cargar datos del colaborador al formulario reactivo
+    const [c1, c2] = (colaborador.cargo || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
     this.formularioColaborador.patchValue({
       rut: colaborador.rut || '',
       nombre: colaborador.nombre || '',
       correo: colaborador.correo || '',
-      tipo: colaborador.tipo || 'Colaborador',
-      cargo: colaborador.cargo || '',
+      cargo1: c1 || '',
+      cargo2: c2 || '',
       universidad_egreso: colaborador.universidad_egreso || '',
       telefono: colaborador.telefono || '',
       direccion: colaborador.direccion || ''
@@ -356,6 +425,7 @@ export class ColaboradoresComponent {
   }
 
   actualizarColaborador() {
+    if (this.soloLecturaVinculacion) return;
     const colaboradorOriginal = this.colaboradorEditando;
 
     // Marcar todos los campos como tocados para mostrar errores
@@ -377,13 +447,12 @@ export class ColaboradoresComponent {
       return;
     }
 
-    const valores = this.formularioColaborador.value;
+    const valores = this.formularioColaborador.value as ColaboradorForm;
 
     // Preparar datos para enviar a la API
     const datosParaEnviar: any = {
       rut: valores.rut?.trim(),
       nombre: valores.nombre?.trim(),
-      tipo: valores.tipo || 'Colaborador'
     };
 
     // Agregar campos opcionales solo si tienen valor
@@ -396,9 +465,10 @@ export class ColaboradoresComponent {
     if (valores.direccion?.trim()) {
       datosParaEnviar.direccion = valores.direccion.trim();
     }
-    if (valores.cargo?.trim()) {
-      datosParaEnviar.cargo = valores.cargo.trim();
-    }
+    const cargosUpd: string[] = [valores.cargo1, valores.cargo2]
+      .filter((c): c is string => !!c && !!c.trim())
+      .map((c) => c.trim());
+    datosParaEnviar.cargos = cargosUpd;
     if (valores.universidad_egreso?.trim()) {
       datosParaEnviar.universidad_egreso = valores.universidad_egreso.trim();
     }
@@ -406,7 +476,7 @@ export class ColaboradoresComponent {
     this.colaboradoresService.actualizar(colaboradorOriginal.id, datosParaEnviar).subscribe({
       next: () => {
         this.snack.open(
-          `✓ ${datosParaEnviar.nombre} actualizado exitosamente`, 
+          `Colaborador "${datosParaEnviar.nombre}" actualizado exitosamente`, 
           'Cerrar', 
           { 
             duration: 4000,
@@ -419,7 +489,7 @@ export class ColaboradoresComponent {
         this.estaEditando = false;
         this.colaboradorEditando = null;
         this.mostrarFormulario = false;
-        this.cargarColaboradores();
+        this.load();
       },
       error: (err) => {
         console.error('Error al actualizar colaborador:', err);
@@ -454,9 +524,9 @@ export class ColaboradoresComponent {
     } else if (form.get('rut')?.hasError('minlength')) {
       errores.push('El RUT debe tener al menos 3 caracteres');
     } else if (form.get('rut')?.hasError('maxlength')) {
-      errores.push('El RUT no puede tener más de 20 caracteres');
+      errores.push('El RUT no puede tener mÃ¡s de 20 caracteres');
     } else if (form.get('rut')?.hasError('rutInvalido')) {
-      errores.push(form.get('rut')?.errors?.['mensaje'] || 'RUT inválido');
+      errores.push(form.get('rut')?.errors?.['mensaje'] || 'RUT invÃ¡lido');
     }
 
     // Nombre
@@ -465,34 +535,31 @@ export class ColaboradoresComponent {
     } else if (form.get('nombre')?.hasError('minlength')) {
       errores.push('El nombre debe tener al menos 3 caracteres');
     } else if (form.get('nombre')?.hasError('maxlength')) {
-      errores.push('El nombre no puede tener más de 120 caracteres');
+      errores.push('El nombre no puede tener mÃ¡s de 120 caracteres');
     }
 
     // Correo
     if (form.get('correo')?.hasError('email')) {
-      errores.push('El correo electrónico no tiene un formato válido');
+      errores.push('El correo electrÃ³nico no tiene un formato vÃ¡lido');
     }
 
-    // Teléfono
+    // TelÃ©fono
     if (form.get('telefono')?.hasError('telefonoInvalido')) {
-      errores.push(form.get('telefono')?.errors?.['mensaje'] || 'Teléfono inválido');
+      errores.push(form.get('telefono')?.errors?.['mensaje'] || 'TelÃ©fono invÃ¡lido');
     }
 
-    // Tipo
-    if (form.get('tipo')?.hasError('required')) {
-      errores.push('El rol es obligatorio');
-    }
+    // Sin campo tipo/rol
 
     return errores;
   }
 
-  // Métodos auxiliares para obtener errores de campos específicos (para mostrar en el template)
+  // MÃ©todos auxiliares para obtener errores de campos especÃ­ficos (para mostrar en el template)
   getErrorRut(): string {
     const control = this.formularioColaborador.get('rut');
     if (control?.hasError('required')) return 'El RUT es obligatorio';
     if (control?.hasError('minlength')) return 'El RUT debe tener al menos 3 caracteres';
-    if (control?.hasError('maxlength')) return 'El RUT no puede tener más de 20 caracteres';
-    if (control?.hasError('rutInvalido')) return control.errors?.['mensaje'] || 'RUT inválido';
+    if (control?.hasError('maxlength')) return 'El RUT no puede tener mÃ¡s de 20 caracteres';
+    if (control?.hasError('rutInvalido')) return control.errors?.['mensaje'] || 'RUT invÃ¡lido';
     return '';
   }
 
@@ -500,20 +567,20 @@ export class ColaboradoresComponent {
     const control = this.formularioColaborador.get('nombre');
     if (control?.hasError('required')) return 'El nombre es obligatorio';
     if (control?.hasError('minlength')) return 'El nombre debe tener al menos 3 caracteres';
-    if (control?.hasError('maxlength')) return 'El nombre no puede tener más de 120 caracteres';
+    if (control?.hasError('maxlength')) return 'El nombre no puede tener mÃ¡s de 120 caracteres';
     return '';
   }
 
   getErrorCorreo(): string {
     const control = this.formularioColaborador.get('correo');
-    if (control?.hasError('email')) return 'Correo electrónico inválido';
+    if (control?.hasError('email')) return 'Correo electrÃ³nico invÃ¡lido';
     return '';
   }
 
   getErrorTelefono(): string {
     const control = this.formularioColaborador.get('telefono');
-    if (control?.hasError('telefonoInvalido')) return control.errors?.['mensaje'] || 'Teléfono inválido';
+    if (control?.hasError('telefonoInvalido')) return control.errors?.['mensaje'] || 'TelÃ©fono invÃ¡lido';
     return '';
   }
-
 }
+
