@@ -66,9 +66,9 @@ export const routes: Routes = [
 
    // Gestión de centros educativos
   {
-    path: 'centros-educativos',
+    path: 'empresas',
     loadComponent: () =>
-      import('./components/centros-educativos/centros-educativos.component').then(m => m.CentrosEducativosComponent),
+      import('./components/empresas/empresas.component').then(m => m.EmpresasComponent),
   },
 
    // Generación de carta de solicitud

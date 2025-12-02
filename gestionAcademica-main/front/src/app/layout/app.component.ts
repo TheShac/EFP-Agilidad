@@ -144,7 +144,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         { label: 'Encuestas',          icon: 'assignment',         route: '/encuestas' },
         { label: 'Estudiantes',        icon: 'school',             route: '/estudiantes' },
         { label: 'Colaboradores',      icon: 'groups',             route: '/colaboradores' },
-        { label: 'Centros educativos', icon: 'domain',             route: '/centros-educativos' },
+        { label: 'Empresas',           icon: 'domain',             route: '/empresas' },
       ];
     }
 
@@ -155,7 +155,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         { label: 'Estudiantes',        icon: 'school',             route: '/estudiantes' },
         { label: 'Tutores',            icon: 'supervisor_account', route: '/tutores' },
         { label: 'Colaboradores',      icon: 'groups',             route: '/colaboradores' },
-        { label: 'Centros educativos', icon: 'domain',             route: '/centros-educativos' },
+        { label: 'Empresas',           icon: 'domain',             route: '/empresas' },
         { label: 'Prácticas',          icon: 'event_note',         route: '/practicas' },     // crea la ruta si aún no existe
         { label: 'Actividades',        icon: 'assignment',         route: '/actividades-estudiantes' },
         { label: 'Reportes/Historial', icon: 'timeline',           route: '/reportes' },     // crea la ruta si aún no existe
