@@ -176,7 +176,7 @@ export class EstudiantesComponent implements OnInit {
         );
         y += 6;
         if (p.centro) {
-          doc.text(`Centro: ${p.centro.nombre}`, 14, y);
+          doc.text(`Empresa: ${p.centro.nombre}`, 14, y);
           y += 6;
         }
       });
@@ -208,4 +208,5 @@ export class EstudiantesComponent implements OnInit {
 
     doc.save(`estudiante_${detalle.rut}.pdf`);
   }
-}
+}
+

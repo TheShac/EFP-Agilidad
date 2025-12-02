@@ -61,12 +61,12 @@
           <div class="form-row">
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Nombre de la empresa *</mat-label>
-              <input matInput [(ngModel)]="newCentroEducativo.nombre" name="nombre" required />
+              <input matInput [(ngModel)]="newEmpresas.nombre" name="nombre" required />
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Tipo *</mat-label>
-              <mat-select [(ngModel)]="newCentroEducativo.tipo" name="tipo" required>
+              <mat-select [(ngModel)]="newEmpresas.tipo" name="tipo" required>
                 <mat-option value="PARTICULAR">ONG</mat-option>
                 <mat-option value="PARTICULAR_SUBVENCIONADO">Publica</mat-option>
                 <mat-option value="SLEP">Privada</mat-option>
@@ -79,7 +79,7 @@
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Región *</mat-label>
               <mat-select
-                [(ngModel)]="newCentroEducativo.region"
+                [(ngModel)]="newEmpresas.region"
                 name="region"
                 (selectionChange)="onRegionChange()"
                 required
@@ -90,7 +90,7 @@
 
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Comuna *</mat-label>
-              <mat-select [(ngModel)]="newCentroEducativo.comuna" name="comuna" required>
+              <mat-select [(ngModel)]="newEmpresas.comuna" name="comuna" required>
                 <mat-option *ngFor="let c of comunasFiltradas" [value]="c">{{ c }}</mat-option>
               </mat-select>
             </mat-form-field>
@@ -100,7 +100,7 @@
           <div class="form-row">
             <mat-form-field appearance="outline" class="form-field full-width">
               <mat-label>Dirección *</mat-label>
-              <input matInput [(ngModel)]="newCentroEducativo.direccion" name="direccion" required />
+              <input matInput [(ngModel)]="newEmpresas.direccion" name="direccion" required />
             </mat-form-field>
           </div>
 
@@ -108,17 +108,17 @@
           <div class="form-row">
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Teléfono</mat-label>
-              <input matInput [(ngModel)]="newCentroEducativo.telefono" name="telefono" />
+              <input matInput [(ngModel)]="newEmpresas.telefono" name="telefono" />
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Correo de la empresa</mat-label>
-              <input matInput type="email" [(ngModel)]="newCentroEducativo.correo" name="correo" />
+              <input matInput type="email" [(ngModel)]="newEmpresas.correo" name="correo" />
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>URL / Redes sociales</mat-label>
-              <input matInput [(ngModel)]="newCentroEducativo.url_rrss" name="url_rrss" />
+              <input matInput [(ngModel)]="newEmpresas.url_rrss" name="url_rrss" />
             </mat-form-field>
           </div>
 
@@ -126,7 +126,7 @@
           <div class="form-row">
             <mat-form-field appearance="outline" class="form-field full-width">
               <mat-label>Convenio</mat-label>
-              <mat-select [(ngModel)]="newCentroEducativo.convenio" name="convenio">
+              <mat-select [(ngModel)]="newEmpresas.convenio" name="convenio">
                 <mat-option value="Solicitud directa">Solicitud directa</mat-option>
               </mat-select>
             </mat-form-field>
@@ -139,7 +139,7 @@
               <input
                 matInput
                 [matDatepicker]="pickerAsoc"
-                [value]="toDate(newCentroEducativo.fecha_inicio_asociacion)"
+                [value]="toDate(newEmpresas.fecha_inicio_asociacion)"
                 (dateChange)="onFechaAsociacionChange($event.value)"
                 placeholder="Selecciona fecha"
               />
@@ -244,7 +244,7 @@
   </mat-card>
 
   <!-- DIALOG DETALLES -->
-  <div class="details-dialog" *ngIf="selectedCentroEducativo">
+  <div class="details-dialog" *ngIf="selectedEmpresas">
     <div class="dialog-overlay" (click)="closeDetails()"></div>
 
     <div class="dialog-content">
@@ -255,34 +255,34 @@
         </button>
       </div>
 
-      <div class="dialog-body" *ngIf="selectedCentroEducativo">
+      <div class="dialog-body" *ngIf="selectedEmpresas">
         <div class="details-grid">
-          <div class="detail-item"><label>Nombre:</label><span>{{ selectedCentroEducativo.nombre }}</span></div>
-          <div class="detail-item"><label>Tipo:</label><span>{{ selectedCentroEducativo.tipo }}</span></div>
-          <div class="detail-item"><label>Región:</label><span>{{ selectedCentroEducativo.region }}</span></div>
-          <div class="detail-item"><label>Comuna:</label><span>{{ selectedCentroEducativo.comuna }}</span></div>
-          <div class="detail-item" *ngIf="selectedCentroEducativo.direccion">
-            <label>Dirección:</label><span>{{ selectedCentroEducativo.direccion }}</span>
+          <div class="detail-item"><label>Nombre:</label><span>{{ selectedEmpresas.nombre }}</span></div>
+          <div class="detail-item"><label>Tipo:</label><span>{{ selectedEmpresas.tipo }}</span></div>
+          <div class="detail-item"><label>Región:</label><span>{{ selectedEmpresas.region }}</span></div>
+          <div class="detail-item"><label>Comuna:</label><span>{{ selectedEmpresas.comuna }}</span></div>
+          <div class="detail-item" *ngIf="selectedEmpresas.direccion">
+            <label>Dirección:</label><span>{{ selectedEmpresas.direccion }}</span>
           </div>
-          <div class="detail-item" *ngIf="selectedCentroEducativo.telefono">
-            <label>Teléfono:</label><span>{{ selectedCentroEducativo.telefono }}</span>
+          <div class="detail-item" *ngIf="selectedEmpresas.telefono">
+            <label>Teléfono:</label><span>{{ selectedEmpresas.telefono }}</span>
           </div>
-          <div class="detail-item" *ngIf="selectedCentroEducativo.correo">
-            <label>Correo:</label><span>{{ selectedCentroEducativo.correo }}</span>
+          <div class="detail-item" *ngIf="selectedEmpresas.correo">
+            <label>Correo:</label><span>{{ selectedEmpresas.correo }}</span>
           </div>
-          <div class="detail-item" *ngIf="selectedCentroEducativo.url_rrss">
-            <label>URL / RRSS:</label><span>{{ selectedCentroEducativo.url_rrss }}</span>
+          <div class="detail-item" *ngIf="selectedEmpresas.url_rrss">
+            <label>URL / RRSS:</label><span>{{ selectedEmpresas.url_rrss }}</span>
           </div>
-          <div class="detail-item" *ngIf="selectedCentroEducativo.convenio">
-            <label>Convenio:</label><span>{{ selectedCentroEducativo.convenio }}</span>
+          <div class="detail-item" *ngIf="selectedEmpresas.convenio">
+            <label>Convenio:</label><span>{{ selectedEmpresas.convenio }}</span>
           </div>
-          <div class="detail-item" *ngIf="selectedCentroEducativo.fecha_inicio_asociacion">
-            <label>Inicio de asociación:</label><span>{{ selectedCentroEducativo.fecha_inicio_asociacion }}</span>
+          <div class="detail-item" *ngIf="selectedEmpresas.fecha_inicio_asociacion">
+            <label>Inicio de asociación:</label><span>{{ selectedEmpresas.fecha_inicio_asociacion }}</span>
           </div>
 
-          <div class="detail-item" *ngIf="selectedCentroEducativo.trabajadores?.length">
+          <div class="detail-item" *ngIf="selectedEmpresas.trabajadores?.length">
             <label>Trabajadores:</label>
-            <div *ngFor="let t of selectedCentroEducativo.trabajadores">
+            <div *ngFor="let t of selectedEmpresas.trabajadores">
               â€¢ {{ t.rol || 'â€”' }} â€” {{ t.nombre }}
               <span *ngIf="t.rut">({{ t.rut }})</span>
               <span *ngIf="t.correo">â€” {{ t.correo }}</span>
@@ -294,7 +294,7 @@
 
       <div class="dialog-actions">
         <button mat-stroked-button (click)="closeDetails()">Cerrar</button>
-        <button mat-raised-button color="primary" (click)="editCentro(selectedCentroEducativo!)" *ngIf="!soloLecturaVinculacion">
+        <button mat-raised-button color="primary" (click)="editCentro(selectedEmpresas!)" *ngIf="!soloLecturaVinculacion">
           <mat-icon>edit</mat-icon> Editar
         </button>
       </div>
