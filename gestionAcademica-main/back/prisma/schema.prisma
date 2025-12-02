@@ -19,15 +19,10 @@ enum EstadoActividad {
   OBSERVADA
 }
 
-enum TipoCentro {
-  PARTICULAR
-  PARTICULAR_SUBVENCIONADO @map("PARTICULAR SUBVENCIONADO")
-  SLEP
-}
-
-enum TipoTutor {
-  Supervisor
-  Tallerista
+enum TipoEmpresa {
+  ONG
+  PUBLICA @map("PUBLICA")
+  PRIVADA
 }
 
 enum TipoPregunta {
@@ -80,7 +75,7 @@ model Practica {
   @@map("practica")
 }
 
-model CentroEducativo {
+model empresa {
   id                      Int         @id @default(autoincrement())
   nombre                  String
   region                  String?
@@ -107,8 +102,8 @@ model TrabajadorEduc {
   correo   String?
   telefono Int?
 
-  centroId Int
-  centro   CentroEducativo @relation(fields: [centroId], references: [id], onDelete: Cascade)
+  empresaId Int
+  empresa   Empresas @relation(fields: [centroId], references: [id], onDelete: Cascade)
 
   @@map("trabajador_educ")
 }

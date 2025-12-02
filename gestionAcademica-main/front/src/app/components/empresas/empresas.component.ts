@@ -17,20 +17,20 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 // APIs
 import {
   CentrosApiService,
-  CentroEducativoDTO,
+  EmpresasDTO,
   TrabajadorDTO,
   CreateCentroPayload,
   UpdateCentroPayload,
-} from '../../services/centros-api.service';
+} from '../../services/empresas-api.service';
 import { TrabajadoresApiService } from '../../services/trabajadores-api.service';
 import { OnInit } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 // === tipos compatibles con tu enum Prisma ===
-type TipoCentro = 'PARTICULAR' | 'PARTICULAR_SUBVENCIONADO' | 'SLEP' | 'NO_CONVENCIONAL';
-type Convenio   = 'Marco SLEP' | 'Solicitud directa' | 'ADEP' | string;
+type TipoCentro = 'ONG' | 'PUBLICA' | 'PRIVADA';
+type Convenio   = 'Solicitud directa' | string;
 
-interface CentroEducativo {
+interface Empresas {
   id: number;
   nombre: string;
   tipo: TipoCentro;
@@ -44,15 +44,15 @@ interface CentroEducativo {
   fecha_inicio_asociacion?: string | null; // YYYY-MM-DD
 }
 
-type CentroDetalle = CentroEducativo & {
+type CentroDetalle = Empresas & {
   trabajadores?: TrabajadorDTO[];
 };
 
 @Component({
   standalone: true,
-  selector: 'app-centros-educativos',
-  templateUrl: './centros-educativos.component.html',
-  styleUrls: ['./centros-educativos.component.scss'],
+  selector: 'app-empresas',
+  templateUrl: './empresas.component.html',
+  styleUrls: ['./empresas.component.scss'],
   imports: [
     CommonModule,
     FormsModule,
@@ -68,7 +68,7 @@ type CentroDetalle = CentroEducativo & {
   MatPaginatorModule,
   ],
 })
-export class CentrosEducativosComponent implements OnInit {
+export class EmpresasComponent implements OnInit {
   private snack = inject(MatSnackBar);
   private platformId = inject(PLATFORM_ID);
 
@@ -116,12 +116,12 @@ export class CentrosEducativosComponent implements OnInit {
 
   // ===== formulario =====
   editId: number | null = null;
-  newCentroEducativo: Partial<CentroEducativo> = {
+  newEmpresas: Partial<Empresas> = {
     nombre: '',
-    tipo: 'SLEP',
+    tipo: 'ONG',
     region: '',
     comuna: '',
-    convenio: 'Marco SLEP',
+    convenio: '',
     direccion: '',
     url_rrss: '',
     telefono: '',
@@ -144,17 +144,17 @@ export class CentrosEducativosComponent implements OnInit {
   private contactoUtpId: number | null = null;
 
   // ===== datos (lista) =====
-  centrosEducativos: CentroEducativo[] = [];
+  centrosEducativos: Empresas[] = [];
 
   // dialog detalles
-  selectedCentroEducativo: CentroDetalle | null = null;
+  selectedEmpresas: CentroDetalle | null = null;
   detalleCargando = false;
 
   // confirm delete
-  pendingDelete: CentroEducativo | null = null;
+  pendingDelete: Empresas | null = null;
 
   // modal contactos (nuevo)
-  contactsForCentro: CentroEducativo | null = null;
+  contactsForCentro: Empresas | null = null;
 
   constructor() {
     this.load(); 
@@ -216,7 +216,7 @@ export class CentrosEducativosComponent implements OnInit {
       });
   }
 
-  private mapDTOtoUI = (dto: CentroEducativoDTO): CentroEducativo => ({
+  private mapDTOtoUI = (dto: EmpresasDTO): Empresas => ({
     id: dto.id,
     nombre: dto.nombre,
     tipo: (dto.tipo as TipoCentro) ?? 'SLEP',
@@ -248,7 +248,7 @@ export class CentrosEducativosComponent implements OnInit {
   }
 
   onFechaAsociacionChange(d: Date | null) {
-    this.newCentroEducativo.fecha_inicio_asociacion = this.toISODateOnly(d);
+    this.newEmpresas.fecha_inicio_asociacion = this.toISODateOnly(d);
   }
 
   // ===== helpers UI =====
@@ -259,20 +259,20 @@ export class CentrosEducativosComponent implements OnInit {
   }
 
   onRegionChange() {
-    const region = this.newCentroEducativo.region || '';
+    const region = this.newEmpresas.region || '';
     const reg = this.REGIONES.find((r) => r.nombre === region);
     this.comunasFiltradas = reg ? reg.comunas : [];
-    if (!this.comunasFiltradas.includes(this.newCentroEducativo.comuna || '')) {
-      this.newCentroEducativo.comuna = '';
+    if (!this.comunasFiltradas.includes(this.newEmpresas.comuna || '')) {
+      this.newEmpresas.comuna = '';
     }
   }
 
   private resetForm() {
     this.isEditing = false;
     this.editId = null;
-    this.newCentroEducativo = {
+    this.newEmpresas = {
       nombre: '',
-      tipo: 'SLEP',
+      tipo: 'PUBLICA',
       region: '',
       comuna: '',
       convenio: 'Marco SLEP',
@@ -295,13 +295,13 @@ export class CentrosEducativosComponent implements OnInit {
     };
     this.contactoDirectorId = null;
     this.contactoUtpId = null;
-    this.selectedCentroEducativo = null;
+    this.selectedEmpresas = null;
   }
 
   // ===== CRUD centro =====
   addOrUpdateCentro() {
     if (this.soloLecturaVinculacion) return;
-    const c = this.newCentroEducativo;
+    const c = this.newEmpresas;
 
     if (!c.nombre?.trim() || !c.tipo || !c.region || !c.comuna || !c.convenio) {
       this.snack.open('Debe completar todos los campos requeridos.', 'Cerrar', {
@@ -355,17 +355,17 @@ export class CentrosEducativosComponent implements OnInit {
     });
   }
 
-  editCentro(c: CentroEducativo) {
+  editCentro(c: Empresas) {
     if (this.soloLecturaVinculacion) return;
     this.isEditing = true;
     this.editId = c.id;
     this.showForm = true;
-    this.newCentroEducativo = { ...c };
+    this.newEmpresas = { ...c };
     this.onRegionChange();
   }
 
   // ===== Confirmación de eliminación =====
-  askDelete(c: CentroEducativo) {
+  askDelete(c: Empresas) {
     if (this.soloLecturaVinculacion) return;
     this.pendingDelete = c;
   }
@@ -401,14 +401,14 @@ export class CentrosEducativosComponent implements OnInit {
   }
 
   // ===== Detalles =====
-  viewCentro(c: CentroEducativo) {
+  viewCentro(c: Empresas) {
     this.detalleCargando = true;
-    this.selectedCentroEducativo = null;
+    this.selectedEmpresas = null;
 
     this.centrosApi.getById(c.id).subscribe({
       next: (full) => {
         const base = this.mapDTOtoUI(full);
-        this.selectedCentroEducativo = {
+        this.selectedEmpresas = {
           ...base,
           trabajadores: full.trabajadores ?? [],
         };
@@ -424,11 +424,11 @@ export class CentrosEducativosComponent implements OnInit {
   }
 
   closeDetails() {
-    this.selectedCentroEducativo = null;
+    this.selectedEmpresas = null;
   }
 
   // ===== Añadir/Editar contactos (modal) =====
-  openContacts(c: CentroEducativo) {
+  openContacts(c: Empresas) {
     if (this.soloLecturaVinculacion) return;
     this.contactsForCentro = c;
 

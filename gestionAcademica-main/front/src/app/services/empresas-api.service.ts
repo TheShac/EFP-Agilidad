@@ -14,7 +14,7 @@ export interface TrabajadorDTO {
   centroId?: number;
 }
 
-export interface CentroEducativoDTO {
+export interface EmpresasDTO {
   id: number;
   nombre: string;
   tipo: 'PARTICULAR' | 'PARTICULAR_SUBVENCIONADO' | 'SLEP' | 'NO_CONVENCIONAL' | string;
@@ -56,7 +56,7 @@ export class CentrosApiService {
   list(params?: {
     page?: number; limit?: number; search?: string; tipo?: string;
     orderBy?: string; orderDir?: 'asc' | 'desc';
-  }): Observable<PagedResult<CentroEducativoDTO>> {
+  }): Observable<PagedResult<EmpresasDTO>> {
     let p = new HttpParams();
     if (params?.page != null)  p = p.set('page', params.page);
     if (params?.limit != null) p = p.set('limit', params.limit);
@@ -64,11 +64,11 @@ export class CentrosApiService {
     if (params?.tipo)          p = p.set('tipo', params.tipo);
     if (params?.orderBy)       p = p.set('orderBy', params.orderBy);
     if (params?.orderDir)      p = p.set('orderDir', params.orderDir);
-    return this.http.get<PagedResult<CentroEducativoDTO>>(`${API}/centros`, { params: p });
+    return this.http.get<PagedResult<EmpresasDTO>>(`${API}/centros`, { params: p });
   }
 
-  getById(id: number): Observable<CentroEducativoDTO> {
-    return this.http.get<CentroEducativoDTO>(`${API}/centros/${id}`);
+  getById(id: number): Observable<EmpresasDTO> {
+    return this.http.get<EmpresasDTO>(`${API}/centros/${id}`);
   }
 
   // ========== CREATE ==========
@@ -92,7 +92,7 @@ export class CentrosApiService {
       fecha_inicio_asociacion: body.fecha_inicio_asociacion ?? null, 
     };
 
-    return this.http.post<CentroEducativoDTO>(`${API}/centros`, payload);
+    return this.http.post<EmpresasDTO>(`${API}/centros`, payload);
   }
 
   // ========== UPDATE ==========
@@ -117,7 +117,7 @@ export class CentrosApiService {
     if (body.fecha_inicio_asociacion !== undefined)
       payload.fecha_inicio_asociacion = body.fecha_inicio_asociacion ?? null;
 
-    return this.http.patch<CentroEducativoDTO>(`${API}/centros/${id}`, payload);
+    return this.http.patch<EmpresasDTO>(`${API}/centros/${id}`, payload);
   }
 
   delete(id: number) {

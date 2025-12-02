@@ -2,14 +2,14 @@
   <!-- HEADER -->
   <div class="header">
     <div class="headline">
-      <h1>Gestión de Centros Educativos</h1>
-      <p class="muted">Registrar, editar y buscar centros educativos asociados</p>
+      <h1>Gestión de Empresas</h1>
+      <p class="muted">Registrar, editar y buscar empresas asociadas</p>
     </div>
     <div class="spacer"></div>
 
     <button mat-flat-button color="primary" (click)="toggleForm()" class="btn-add" *ngIf="!soloLecturaVinculacion">
       <mat-icon>{{ showForm ? 'close' : 'add_business' }}</mat-icon>
-      {{ showForm ? 'Cerrar' : 'Agregar centro' }}
+      {{ showForm ? 'Cerrar' : 'Agregar Empresa' }}
     </button>
   </div>
 
@@ -31,10 +31,9 @@
         <mat-label>Tipo (filtro)</mat-label>
         <mat-select [(ngModel)]="selectedTipo" name="selectedTipo">
           <mat-option value="all">Todos</mat-option>
-          <mat-option value="PARTICULAR">Particular</mat-option>
-          <mat-option value="PARTICULAR_SUBVENCIONADO">Particular subvencionado</mat-option>
-          <mat-option value="SLEP">SLEP</mat-option>
-          <mat-option value="NO_CONVENCIONAL">No Convencional</mat-option>
+          <mat-option value="PARTICULAR">ONG</mat-option>
+          <mat-option value="PARTICULAR_SUBVENCIONADO">Publica</mat-option>
+          <mat-option value="SLEP">Privada</mat-option>
         </mat-select>
       </mat-form-field>
     </div>
@@ -47,7 +46,7 @@
         <div class="form-title-section">
           <div class="form-icon"><mat-icon>add_business</mat-icon></div>
           <div class="form-titles">
-            <h2>{{ isEditing ? 'Editar centro educativo' : 'Agregar centro educativo' }}</h2>
+            <h2>{{ isEditing ? 'Editar centro educativo' : 'Agregar Empresa' }}</h2>
             <p>Completa los datos obligatorios marcados con *</p>
           </div>
         </div>
@@ -61,17 +60,16 @@
           <!-- Básicos -->
           <div class="form-row">
             <mat-form-field appearance="outline" class="form-field">
-              <mat-label>Nombre del centro *</mat-label>
+              <mat-label>Nombre de la empresa *</mat-label>
               <input matInput [(ngModel)]="newCentroEducativo.nombre" name="nombre" required />
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Tipo *</mat-label>
               <mat-select [(ngModel)]="newCentroEducativo.tipo" name="tipo" required>
-                <mat-option value="PARTICULAR">Particular</mat-option>
-                <mat-option value="PARTICULAR_SUBVENCIONADO">Particular subvencionado</mat-option>
-                <mat-option value="SLEP">SLEP</mat-option>
-                <mat-option value="NO_CONVENCIONAL">No Convencional</mat-option>
+                <mat-option value="PARTICULAR">ONG</mat-option>
+                <mat-option value="PARTICULAR_SUBVENCIONADO">Publica</mat-option>
+                <mat-option value="SLEP">Privada</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
@@ -114,7 +112,7 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field">
-              <mat-label>Correo del colegio</mat-label>
+              <mat-label>Correo de la empresa</mat-label>
               <input matInput type="email" [(ngModel)]="newCentroEducativo.correo" name="correo" />
             </mat-form-field>
 
@@ -129,9 +127,7 @@
             <mat-form-field appearance="outline" class="form-field full-width">
               <mat-label>Convenio</mat-label>
               <mat-select [(ngModel)]="newCentroEducativo.convenio" name="convenio">
-                <mat-option value="Marco SLEP">Marco SLEP</mat-option>
                 <mat-option value="Solicitud directa">Solicitud directa</mat-option>
-                <mat-option value="ADEP">ADEP</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
