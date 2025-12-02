@@ -78,10 +78,11 @@ export class CartaComponent {
   private logoFehImg: PdfAsset | null = null;
 
   private readonly TIPOS_PRACTICA_FALLBACK = [
-    'Apoyo a la Docencia I',
-    'Apoyo a la Docencia II',
-    'Apoyo a la Docencia III',
-    'Practica Profesional',
+    'Vinculación Empresarial',
+    'Proyecto Corporativo',
+    'Consultoría Empresarial',
+    'Innovación y Desarrollo',
+    'Capacitación Interna',
   ];
 
   // --- Catálogos ---
@@ -131,7 +132,7 @@ export class CartaComponent {
   // ==========================
   //  CONSTANTES DE JEFATURA
   // ==========================
-  private readonly JEFATURA_NOMBRE = 'Dr. IGNACIO JARA PARRA';
+  private readonly JEFATURA_NOMBRE = 'Dr. Humberto Hurrutia';
   private readonly JEFATURA_CARGO = 'Jefe de Carrera';
 
   get minFechaFin(): Date | null {
@@ -168,21 +169,21 @@ export class CartaComponent {
   // Texto de referencia por tipo de práctica
   private referenciaPorTipo(tipo?: string | null): string {
     switch (tipo) {
-      case 'Apoyo a la Docencia I':
-        return 'SOLICITUD DE AUTORIZACIÓN PARA APOYO A LA DOCENCIA I';
-      case 'Apoyo a la Docencia II':
-        return 'SOLICITUD DE AUTORIZACIÓN PARA APOYO A LA DOCENCIA II';
-      case 'Apoyo a la Docencia III':
-        return 'SOLICITUD DE AUTORIZACIÓN PARA APOYO A LA DOCENCIA III';
-      case 'Práctica Profesional':
-        return 'SOLICITUD DE AUTORIZACIÓN PARA PRÁCTICA PROFESIONAL';
+      case 'Vinculación Empresarial I':
+        return 'SOLICITUD DE VINCULACIÓN EMPRESARIAL I';
+      case 'Vinculación Empresarial II':
+        return 'SOLICITUD DE VINCULACIÓN EMPRESARIAL II';
+      case 'Vinculación Empresarial III':
+        return 'SOLICITUD DE VINCULACIÓN EMPRESARIAL III';
+      case 'Práctica Empresarial':
+        return 'SOLICITUD DE VINCULACIÓN PARA PRÁCTICA EMPRESARIAL';
       default:
-        return 'SOLICITUD DE AUTORIZACIÓN PARA PRÁCTICA';
+        return 'SOLICITUD DE VINCULACIÓN PARA PRÁCTICA EMPRESARIAL';
     }
   }
 
   private encabezado(refConFolio: boolean, folioBack?: string): string {
-    const ciudad = this.centroSeleccionado?.comuna || 'Arica';
+    const ciudad = this.centroSeleccionado?.comuna || 'Ciudad';
     const fecha = this.fechaHoy();
 
     const folioManual = this.form.value.folioManual?.trim();
@@ -200,10 +201,8 @@ export class CartaComponent {
     const c = this.centroSeleccionado;
     const { linea, cargo } = this.destinatario();
     const centro = c?.nombre || '';
-    // ApiCentro no tiene 'direccion', así que la omitimos
-
     const cargoLinea = cargo ? `\n${cargo}` : '';
-    return `Señor(a)\n${linea}${cargoLinea}\n${centro}\nPresente\n\nDe mi consideración:\n`;
+    return `Estimado(a)\n${linea}${cargoLinea}\n${centro}\nPresente\n\nDe mi consideración:\n`;
   }
 
   private cuerpoSegunPDF(): string {
@@ -211,41 +210,45 @@ export class CartaComponent {
     const pi = this.fechaLarga(this.form.value.periodoInicio);
     const pf = this.fechaLarga(this.form.value.periodoFin);
     const periodoTxt = pi && pf ? `, entre el ${pi} y el ${pf}` : '';
-
     const intro =
-      `Conforme a lo establecido en el currículo de la Carrera de Pedagogía en Historia y Geografía, ` +
-      `solicitamos su autorización para que ${this.plural ? 'los...s estudiantes realicen' : 'el siguiente estudiante realice'} ` +
-      `${this.plural ? 'sus' : 'su'} práctica ${tipo} en ese establecimiento${periodoTxt}:`;
+      `En el marco de la vinculación entre nuestra carrera y el sector empresarial, ` +
+      `solicitamos su colaboración para que ${this.plural ? 'los estudiantes participen' : 'el siguiente estudiante participe'} ` +
+      `${this.plural ? 'sus' : 'su'} práctica empresarial en su empresa${periodoTxt}:`;
 
     // Supervisor dinámico
     const sup = this.supervisorSeleccionado;
     const supLinea = sup
-      ? `La tutora de práctica responsable es la ${sup.trato ?? ''} ${sup.nombre}.`.replace(/\s+/g, ' ').trim()
-      : 'La tutora de práctica responsable es la Srta. Carolina Quintana Talvac.'; // fallback
+      ? `El gestor empresarial responsable es ${sup.trato ?? ''} ${sup.nombre}.`.replace(/\s+/g, ' ').trim()
+      : 'El gestor empresarial responsable es Humberto Hurrutia.'; // fallback
 
     const adjuntos = `${supLinea}
 
 Adjuntamos el detalle de la estructura de la práctica solicitada, junto con los siguientes documentos:
-• Credencial del profesor en práctica.
-• Perfiles de egreso.
-• Ficha de seguro escolar (Decreto Ley N.º 16.774) de cada estudiante.
-• Responsabilidades del docente colaborador en el aula.
+• Credencial del estudiante en práctica.
+• Perfil profesional.
+• Seguro de accidentes laborales de cada estudiante.
+• Responsabilidades del supervisor empresarial.
 
-Agradecemos de antemano las facilidades y quedamos atentos a su respuesta.
+Agradecemos de antemano su colaboración y quedamos atentos a su respuesta.
 `;
 
     const nombreJefatura =
-      this.form.value.jefaturaNombre?.trim() || this.JEFATURA_NOMBRE;
+      'Humberto Hurrutia';
     const cargoJefatura =
-      this.form.value.jefaturaCargo?.trim() || this.JEFATURA_CARGO;
+      'Jefe de Carrera';
+    const nombreDirector =
+      'Héctor Ossandón';
+    const cargoDirector =
+      'Director de Carrera';
 
     const firma = `Se despide atentamente,
 
 ${nombreJefatura}
 ${cargoJefatura}
-Facultad de Educación y Humanidades
-Universidad de Tarapacá`;
+${nombreDirector}
+${cargoDirector}`;
 
+    return `${intro}\n\n${this.listaEstudiantes()}\n\n${adjuntos}\n${firma}`;
     return `${intro}\n\n${this.listaEstudiantes()}\n\n${adjuntos}\n${firma}`;
   }
 
@@ -337,19 +340,19 @@ Universidad de Tarapacá`;
     // Encabezado textual bajo logos
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
-    doc.text('Carrera de Pedagogía en Historia y Geografía', margin.left, y);
+    doc.text('Ingeniería Civil en Computación e Informática', margin.left, y);
     y += 14;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.text(
-      'Facultad de Educación y Humanidades — Universidad de Tarapacá',
+      'Facultad de Ingeniería — Universidad de Tarapacá',
       margin.left,
       y
     );
     y += 12;
     doc.setTextColor(100);
     doc.text(
-      'Av. 18 de Septiembre N°2222 · Arica · pedhg@gestion.uta.cl · +56 58 2205253',
+      'Av. 18 de Septiembre N°2222 · Arica · icci@gestion.uta.cl · +56 58 2205919',
       margin.left,
       y
     );
@@ -398,9 +401,9 @@ Universidad de Tarapacá`;
   ngOnInit(): void {
     // Valores por defecto de los campos de carta
     this.form.patchValue({
-      referencia: 'SOLICITUD DE AUTORIZACIÓN PARA PRÁCTICA',
-      jefaturaNombre: this.JEFATURA_NOMBRE,
-      jefaturaCargo: this.JEFATURA_CARGO,
+      referencia: 'SOLICITUD DE VINCULACIÓN EMPRESARIAL',
+      jefaturaNombre: 'Humberto Hurrutia',
+      jefaturaCargo: 'Jefe de Carrera',
     });
 
     // Actualizamos la referencia automáticamente según el tipo de práctica,
@@ -622,9 +625,9 @@ Universidad de Tarapacá`;
       supervisorId: null,
       periodoInicio: null,
       periodoFin: null,
-      referencia: 'SOLICITUD DE AUTORIZACIÓN PARA PRÁCTICA',
-      jefaturaNombre: this.JEFATURA_NOMBRE,
-      jefaturaCargo: this.JEFATURA_CARGO,
+      referencia: 'SOLICITUD DE VINCULACIÓN EMPRESARIAL',
+      jefaturaNombre: 'Humberto Hurrutia',
+      jefaturaCargo: 'Jefe de Carrera',
       folioManual: '',
     });
     this.studentFilter = '';

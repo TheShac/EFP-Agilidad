@@ -2,8 +2,8 @@
   <!-- Encabezado y botones -->
   <div class="toolbar">
     <div class="titles">
-      <h1>Generar carta</h1>
-      <p class="muted">Solicitud de autorización para práctica</p>
+      <h1>Generar carta empresarial</h1>
+      <p class="muted">Solicitud de vinculación para práctica<br>Ingeniería Civil en Computación e Informática — Facultad de Ingeniería</p>
     </div>
 
     <div class="actions">
@@ -42,7 +42,7 @@
         <div class="grid g3">
           <!-- Tipo de práctica -->
           <mat-form-field appearance="outline">
-            <mat-label>Tipo de práctica</mat-label>
+            <mat-label>Tipo de práctica </mat-label>
             <mat-select formControlName="tipoPractica" required>
               <mat-option *ngFor="let t of tiposPractica" [value]="t">
                 {{ t }}
@@ -55,7 +55,7 @@
 
           <!-- Centro educativo -->
           <mat-form-field appearance="outline" class="full-when-sm">
-            <mat-label>Centro educativo</mat-label>
+            <mat-label>Empresa</mat-label>
             <mat-select formControlName="centroId" required>
               <mat-option *ngFor="let c of centros" [value]="c.id">
                 {{ c.nombre }} — {{ c.comuna ?? "s/ comuna" }},
@@ -63,7 +63,7 @@
               </mat-option>
             </mat-select>
             <mat-error *ngIf="form.get('centroId')?.hasError('required')">
-              Selecciona un centro educativo
+              Selecciona una empresa
             </mat-error>
           </mat-form-field>
         </div>
@@ -73,7 +73,7 @@
         <!-- Línea 2: Estudiantes -->
         <div class="grid g1">
           <mat-form-field appearance="outline" class="full">
-            <mat-label>Estudiante(s)</mat-label>
+            <mat-label>Participante(s)</mat-label>
             <mat-select formControlName="estudiantesIds" multiple required>
               <mat-option disabled>
                 <mat-icon>search</mat-icon>
@@ -93,9 +93,9 @@
                 {{ e.nombre }} — Rut {{ e.rut }}
               </mat-option>
             </mat-select>
-            <mat-hint>Puede seleccionar uno o más</mat-hint>
+            <mat-hint>Puede seleccionar uno o más participantes</mat-hint>
             <mat-error *ngIf="form.get('estudiantesIds')?.hasError('required')">
-              Selecciona al menos un(a) estudiante
+              Selecciona al menos un participante
             </mat-error>
           </mat-form-field>
         </div>
@@ -105,7 +105,7 @@
         <!-- Supervisor -->
         <div class="grid g1">
           <mat-form-field appearance="outline" class="full">
-            <mat-label>Tutora/or de práctica responsable</mat-label>
+              <mat-label>Responsable empresarial</mat-label>
             <mat-select formControlName="supervisorId" required>
               <mat-option disabled>
                 <mat-icon>search</mat-icon>
@@ -126,9 +126,9 @@
                 {{ s.trato ? s.trato + " " : "" }}{{ s.nombre }}
               </mat-option>
             </mat-select>
-            <mat-hint>Seleccione la persona tutora responsable</mat-hint>
+            <mat-hint>Seleccione la persona responsable empresarial</mat-hint>
             <mat-error *ngIf="form.get('supervisorId')?.hasError('required')">
-              Selecciona a la tutora o tutor responsable
+                Selecciona a la responsable empresarial
             </mat-error>
           </mat-form-field>
         </div>
@@ -188,11 +188,11 @@
               <input
                 matInput
                 formControlName="referencia"
-                placeholder="SOLICITUD DE AUTORIZACION PARA PRACTICA"
+                placeholder="SOLICITUD DE AUTORIZACION PARA ACTIVIDAD EMPRESARIAL"
               />
             </mat-form-field>
             <small class="field-note">
-              Se usará en la línea REF. del documento
+              Se usará en la línea REF. del documento empresarial
             </small>
           </div>
 
@@ -213,12 +213,12 @@
 
         <div class="grid g2">
           <mat-form-field appearance="outline">
-            <mat-label>Nombre Jefatura de Carrera</mat-label>
+            <mat-label>Nombre Jefatura de Área</mat-label>
             <input matInput formControlName="jefaturaNombre" />
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Cargo Jefatura</mat-label>
+            <mat-label>Cargo Jefatura de Área</mat-label>
             <input matInput formControlName="jefaturaCargo" />
           </mat-form-field>
         </div>

@@ -36,10 +36,11 @@ export class CartaDataService {
 
   private readonly API = 'http://localhost:3000';
   private readonly TIPOS_PRACTICA_DEFAULT = [
-    'Apoyo a la Docencia I',
-    'Apoyo a la Docencia II',
-    'Apoyo a la Docencia III',
-    'Práctica Profesional',
+    'Vinculación Empresarial',
+    'Proyecto Corporativo',
+    'Consultoría Empresarial',
+    'Innovación y Desarrollo',
+    'Capacitación Interna',
   ];
 
   constructor(private http: HttpClient) {}
